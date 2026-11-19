@@ -1,0 +1,512 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Radar Part 1 Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: a single reading column; each topic = short theory, then an instrument-like lab panel with live plots */
+:root{
+  --bg:#eef2f5; --surface:#ffffff; --sunk:#f5f8fa; --ink:#13202b; --muted:#5a6a77; --line:#d3dce3; --grid:#e3e9ee;
+  --tx:#0d7a85; --echo:#c25e08; --mf:#5b4fd0; --ok:#1d7f4e; --warn:#a86a00; --bad:#b4322c;
+  --font-display:"Space Grotesk",system-ui,sans-serif; --font-body:"Inter",system-ui,sans-serif; --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1318; --surface:#131d25; --sunk:#0f181f; --ink:#e2eaf0; --muted:#93a4b1; --line:#26353f; --grid:#1c2932;
+  --tx:#3cc0c8; --echo:#f09c45; --mf:#a198ff; --ok:#4cc38a; --warn:#e3b04b; --bad:#f07a72; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1318; --surface:#131d25; --sunk:#0f181f; --ink:#e2eaf0; --muted:#93a4b1; --line:#26353f; --grid:#1c2932;
+  --tx:#3cc0c8; --echo:#f09c45; --mf:#a198ff; --ok:#4cc38a; --warn:#e3b04b; --bad:#f07a72; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+header.top .in{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.brand{font-family:var(--font-display);font-weight:700;letter-spacing:.01em}
+nav.toc{display:flex;gap:6px;flex-wrap:wrap}
+nav.toc a{font-size:13px;text-decoration:none;color:var(--ink);padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--sunk)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--tx);color:var(--tx)}
+.score{margin-left:auto;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.hero{padding-block:36px 8px;display:grid;gap:10px}
+.hero h1{font-family:var(--font-display);font-size:clamp(28px,5vw,42px);line-height:1.1;margin:0;text-wrap:balance}
+.hero p{max-width:65ch;margin:0;color:var(--muted)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:currentColor}
+.c-tx{color:var(--tx)}.c-echo{color:var(--echo)}.c-mf{color:var(--mf)}
+section.topic{padding-top:40px;display:grid;gap:14px;scroll-margin-top:70px}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx)}
+h2{font-family:var(--font-display);font-size:26px;margin:0;line-height:1.2;text-wrap:balance}
+h3{font-family:var(--font-display);font-size:18px;margin:0}
+p{margin:0;max-width:68ch}
+.formulas{display:flex;flex-wrap:wrap;gap:8px}
+.f{font-family:var(--font-mono);font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+.f b{color:var(--tx);font-weight:500}
+.lab{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:14px;min-width:0}
+.lab-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.lab-head .tag{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 18px}
+.ctl{display:grid;gap:4px;min-width:0}
+.ctl label{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.ctl output{font-family:var(--font-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--tx)}
+select,input[type=text],input[type=number]{font:inherit;font-family:var(--font-mono);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--sunk);color:var(--ink);width:100%;box-sizing:border-box}
+button{font:inherit;font-size:13px;font-weight:500;padding:7px 12px;border-radius:6px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--tx)}
+button.primary{background:var(--tx);border-color:var(--tx);color:var(--surface)}
+:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
+canvas{width:100%;height:230px;display:block;background:var(--sunk);border-radius:6px}
+canvas.tall{height:300px}canvas.short{height:170px}
+.readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.ro{background:var(--sunk);border-radius:6px;padding:8px 10px;display:grid;gap:2px}
+.ro span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.ro b{font-family:var(--font-mono);font-weight:500;font-variant-numeric:tabular-nums;font-size:15px}
+.pill{display:inline-block;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid currentColor}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.note{font-size:13.5px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px;max-width:72ch}
+.try{font-size:13.5px;background:var(--sunk);border-radius:6px;padding:10px 12px}
+.try b{color:var(--echo)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.two>*{min-width:0}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.chain .lbl{font-family:var(--font-mono);font-size:12px;color:var(--muted);width:30px}
+.chain button.blk{font-size:12.5px;padding:6px 10px}
+.chain button.blk[aria-pressed=true]{border-color:var(--tx);color:var(--tx);background:var(--surface)}
+.chain .arr{color:var(--muted)}
+.info{background:var(--sunk);border-radius:6px;padding:10px 12px;font-size:14px;min-height:3em}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+td.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mcq{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--sunk)}
+.mcq .opts{display:grid;gap:6px}
+.mcq .opts button{text-align:left;background:var(--surface)}
+.mcq .opts button.right{border-color:var(--ok);color:var(--ok)}
+.mcq .opts button.wrong{border-color:var(--bad);color:var(--bad)}
+.mcq .why{font-size:13.5px;color:var(--muted)}
+.qgrid{display:grid;gap:10px}
+.numq{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--sunk)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row input{max-width:200px}
+.sol{font-family:var(--font-mono);font-size:13px;white-space:pre-wrap}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<header class="top"><div class="in">
+  <div class="brand">Radar · Part 1</div>
+  <nav class="toc" aria-label="Sections">
+    <a href="#basics">1 Basics</a><a href="#dsp">2 DSP</a><a href="#ranging">3 Ranging &amp; MF</a><a href="#barker">4 Barker</a><a href="#calc">Calculator</a><a href="#quiz">Quiz</a>
+  </nav>
+  <div class="score" id="scoreTop">score 0 / 0</div>
+</div></header>
+
+<div class="wrap">
+<div class="hero">
+  <div class="eyebrow">Radar Systems &amp; Remote Sensing · weeks 1–4</div>
+  <h1>Radar Part 1 Lab</h1>
+  <p>Each topic gives you the formulas from the lectures, then a lab you can play with. Move the sliders and watch how each formula behaves. The quiz at the end generates new numeric problems every time you open it.</p>
+  <div class="legend"><span class="c-tx">transmitted pulse</span><span class="c-echo">received echo</span><span class="c-mf">matched-filter output</span></div>
+</div>
+
+<!-- ============ 1 BASICS ============ -->
+<section class="topic" id="basics">
+  <div class="eyebrow">Week 1 · The radar idea</div>
+  <h2>1. What a radar measures and how</h2>
+  <p>A radar transmits an electromagnetic wave and listens for the echo. Range comes from the echo's delay t₀, speed comes from its frequency shift f<sub>D</sub> (weeks 6–7), and angle comes from where the antenna points (week 8).</p>
+  <div class="formulas"><div class="f">R₀ = <b>c·t₀ / 2</b></div><div class="f">c = 3·10⁸ m/s</div><div class="f">monostatic = one antenna for Tx and Rx</div></div>
+
+  <div class="lab">
+    <div class="lab-head"><h3>Monostatic block diagram</h3><span class="tag">click a block</span></div>
+    <div class="chain" id="chainTx"></div>
+    <div class="chain" id="chainRx"></div>
+    <div class="info" id="blkInfo">Click any block to see what it does. The key idea: all signal processing happens at baseband. The Tx chain moves the pulse up to the carrier f<sub>c</sub>, and the Rx chain brings it back down.</div>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><h3>Three waveform families</h3><span class="tag">week 1a · slide 5</span></div>
+    <canvas id="cvWave" class="tall" aria-label="CW, pulsed and FMCW waveforms"></canvas>
+    <p class="note">CW transmits all the time: it measures Doppler but can't time an echo. Pulsed sends bursts of width τ every PRI, so range comes from timing. FMCW sweeps its frequency, so range comes from a frequency difference (stretch processing, week 5).</p>
+  </div>
+</section>
+
+<!-- ============ 2 DSP ============ -->
+<section class="topic" id="dsp">
+  <div class="eyebrow">Week 2 · DSP for radar</div>
+  <h2>2. I/Q, the data cube and the DFT</h2>
+  <p>The receiver mixes with cos and −sin of the carrier and low-pass filters, which gives a complex baseband signal y = y<sub>I</sub> + j·y<sub>Q</sub>. Keeping it complex keeps the phase, and Doppler lives in the phase.</p>
+  <div class="formulas">
+    <div class="f">PRF = 1 / PRI</div><div class="f">DC = τ / PRI</div><div class="f">samples per PRI = PRI·f<sub>s</sub></div>
+    <div class="f">fast time l → <b>range bin</b></div><div class="f">slow time m → <b>pulse number</b></div>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><h3>Data cube y[l, m]</h3><span class="tag">week 2 · week 7c example preloaded</span></div>
+    <div class="controls">
+      <div class="ctl"><label for="dcFs">f<sub>s</sub> <output id="dcFsO"></output></label><input type="range" id="dcFs" min="50" max="1000" step="10" value="200"></div>
+      <div class="ctl"><label for="dcPri">PRI <output id="dcPriO"></output></label><input type="range" id="dcPri" min="0.1" max="2" step="0.05" value="1"></div>
+      <div class="ctl"><label for="dcDc">Duty cycle <output id="dcDcO"></output></label><input type="range" id="dcDc" min="0.005" max="0.3" step="0.005" value="0.1"></div>
+      <div class="ctl"><label for="dcR">Target range R₀ <output id="dcRO"></output></label><input type="range" id="dcR" min="0.2" max="30" step="0.1" value="3.7"></div>
+      <div class="ctl"><label for="dcM">Pulses M <output id="dcMO"></output></label><input type="range" id="dcM" min="4" max="32" step="1" value="20"></div>
+      <div class="ctl"><label for="dcSnr">SNR per sample <output id="dcSnrO"></output></label><input type="range" id="dcSnr" min="-10" max="30" step="1" value="15"></div>
+      <div class="ctl"><label for="dcMf">Display</label><select id="dcMf"><option value="raw">Raw |y[l,m]| (before MF)</option><option value="mf" selected>After matched filter</option></select></div>
+    </div>
+    <canvas id="cvCube" class="tall" aria-label="Data cube heatmap"></canvas>
+    <div class="readouts" id="cubeRO"></div>
+    <div class="try">Try it: switch between <b>Raw</b> and <b>After matched filter</b>. Raw shows L lit rows (the whole pulse). After MF the energy collapses into one row: the target's range bin. That is the bright row in your week 7c slide.</div>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><h3>DTFT vs DFT, zero-padding and leakage</h3><span class="tag">week 2 · week 5b</span></div>
+    <div class="controls">
+      <div class="ctl"><label for="dfF0">Tone f₀ <output id="dfF0O"></output></label><input type="range" id="dfF0" min="0" max="31.75" step="0.25" value="16.5"></div>
+      <div class="ctl"><label for="dfN">Samples N (signal length) <output id="dfNO"></output></label><input type="range" id="dfN" min="8" max="128" step="8" value="64"></div>
+      <div class="ctl"><label for="dfK">FFT size K (NFFT)</label><select id="dfK"><option>16</option><option>32</option><option selected>64</option><option>128</option><option>256</option><option>512</option></select></div>
+    </div>
+    <canvas id="cvDft" aria-label="DTFT and DFT plot"></canvas>
+    <div class="readouts" id="dftRO"></div>
+    <div class="try">Try it: with f₀ = 16 Hz and K = 64 you get one clean spike. Change f₀ to 16.5 Hz and the energy leaks into neighbouring bins. Now set K = 128: the bins land on 16.5 Hz and the leakage disappears. Raising K never makes the curve's main lobe narrower. Only a larger N does that.</div>
+  </div>
+</section>
+
+<!-- ============ 3 RANGING ============ -->
+<section class="topic" id="ranging">
+  <div class="eyebrow">Week 3 · Ranging with a rectangular pulse</div>
+  <h2>3. Range, resolution, ambiguity and the matched filter</h2>
+  <div class="formulas">
+    <div class="f">R₀ = c·t₀/2</div><div class="f">B ≈ 1/τ</div><div class="f">ΔR = <b>cτ/2 = c/(2B)</b></div>
+    <div class="f">R<sub>ua</sub> = <b>(c/2)(PRI − τ)</b></div><div class="f">ΔR<sub>bin</sub> = <b>c/(2f<sub>s</sub>)</b></div><div class="f">k₀ = round(2R₀·f<sub>s</sub>/c)</div>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><h3>Echo timing and maximum unambiguous range</h3><span class="tag">week 3a worksheet</span></div>
+    <div class="controls">
+      <div class="ctl"><label for="etR">Target range <output id="etRO"></output></label><input type="range" id="etR" min="1" max="400" step="1" value="60"></div>
+      <div class="ctl"><label for="etTau">Pulse width τ <output id="etTauO"></output></label><input type="range" id="etTau" min="1" max="200" step="1" value="50"></div>
+      <div class="ctl"><label for="etPri">PRI <output id="etPriO"></output></label><input type="range" id="etPri" min="0.2" max="2" step="0.05" value="1"></div>
+    </div>
+    <canvas id="cvEcho" aria-label="Transmit pulses and echoes over three PRIs"></canvas>
+    <div class="readouts" id="echoRO"></div>
+    <div class="try">Try it: push the target beyond R<sub>ua</sub>. The echo from pulse 1 arrives after pulse 2 has gone out, so the radar thinks the target is close. That's range ambiguity. If the echo lands on top of a transmitted pulse, the radar is deaf to it because a monostatic antenna can't listen while transmitting.</div>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><h3>Pulse width, bandwidth and range resolution</h3><span class="tag">week 3a worksheet</span></div>
+    <div class="controls">
+      <div class="ctl"><label for="rsTau">Pulse width τ <output id="rsTauO"></output></label><input type="range" id="rsTau" min="0.2" max="10" step="0.1" value="1"></div>
+      <div class="ctl"><label for="rsSep">Spacing between two targets <output id="rsSepO"></output></label><input type="range" id="rsSep" min="10" max="1500" step="10" value="200"></div>
+    </div>
+    <div class="two">
+      <div><canvas id="cvSpec" class="short" aria-label="Pulse spectrum"></canvas><p class="note">|X(f)| of the rectangular pulse. The first nulls sit at ±1/τ, so B ≈ 1/τ.</p></div>
+      <div><canvas id="cvRes" class="short" aria-label="Two-target matched filter outputs"></canvas><p class="note">Matched-filter output for two equal targets. Each is a triangle reaching ±cτ/2 in range.</p></div>
+    </div>
+    <div class="readouts" id="resRO"></div>
+    <div class="try">Try it: set the spacing exactly to ΔR. The two triangles sum to a flat plateau with no dip. Any closer and they merge into one bump. Shrink τ and both the spectrum widens and the triangles narrow: that's <b>shorter τ → larger B → smaller ΔR</b>.</div>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><h3>Matched filter on a noisy echo</h3><span class="tag">week 3b · week 4 implementation</span></div>
+    <p>The signal model your code implements: y[n] = √P<sub>r</sub>·x[n − k₀] + w[n], with w complex Gaussian. The matched filter is h[n] = x*[−n] and its output is z = y ∗ h. The peak collects all the pulse energy at the target delay.</p>
+    <p class="note">Use the Barker lab below with "Plain pulse" selected to see this. The plain pulse output is the triangle from week 4's "Υλοποίηση MF" slide. Remember that np.convolve / conv adds a delay of L−1 samples you must subtract.</p>
+  </div>
+</section>
+
+<!-- ============ 4 BARKER ============ -->
+<section class="topic" id="barker">
+  <div class="eyebrow">Week 4 · Pulse compression</div>
+  <h2>4. Barker codes: long-pulse energy with short-pulse resolution</h2>
+  <p>A long pulse has high energy E = A²τ, which helps detection, but poor resolution cτ/2. Peak power A² is limited by the hardware. The fix: keep the long pulse and flip the sign of N chips of length τ<sub>c</sub> = τ/N. The energy is unchanged, the bandwidth becomes 1/τ<sub>c</sub>, and the matched filter compresses the echo into a peak about τ<sub>c</sub> wide.</p>
+  <div class="formulas">
+    <div class="f">E = A²τ (unchanged)</div><div class="f">B ≈ 1/τ<sub>c</sub></div><div class="f">ΔR<sub>c</sub> = <b>cτ<sub>c</sub>/2</b></div><div class="f">compression = τ/τ<sub>c</sub> = N</div><div class="f">Barker: peak N, sidelobes ≤ 1</div>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><h3>Pulse-compression lab</h3><span class="tag">τ<sub>c</sub> = 1 µs · f<sub>s</sub> = 4 MHz</span></div>
+    <div class="controls">
+      <div class="ctl"><label for="bkType">Waveform</label><select id="bkType"><option value="barker" selected>Barker-coded pulse</option><option value="plain">Plain pulse (same length and energy)</option></select></div>
+      <div class="ctl"><label for="bkN">Code length N</label><select id="bkN"><option>2</option><option>3</option><option>4</option><option>5</option><option>7</option><option>11</option><option selected>13</option></select></div>
+      <div class="ctl"><label for="bkSnr">SNR per sample <output id="bkSnrO"></output></label><input type="range" id="bkSnr" min="-20" max="30" step="1" value="0"></div>
+      <div class="ctl"><label for="bkR1">Target 1 range <output id="bkR1O"></output></label><input type="range" id="bkR1" min="300" max="6000" step="15" value="3000"></div>
+      <div class="ctl"><label for="bkR2">Target 2 range <output id="bkR2O"></output></label><input type="range" id="bkR2" min="300" max="6000" step="15" value="3300"></div>
+      <div class="ctl"><label for="bkTwo">Targets</label><select id="bkTwo"><option value="2" selected>Two targets</option><option value="1">Target 1 only</option></select></div>
+    </div>
+    <div class="row"><button id="bkNoise">New noise sample</button><span class="note" id="bkCode"></span></div>
+    <canvas id="cvBkTx" class="short" aria-label="Transmitted pulse"></canvas>
+    <canvas id="cvBkRx" class="short" aria-label="Received signal"></canvas>
+    <canvas id="cvBkMf" aria-label="Matched filter output"></canvas>
+    <div class="readouts" id="bkRO"></div>
+    <div class="try">Try it: with two targets 300 m apart, switch between <b>Barker</b> and <b>Plain</b>. Both waveforms carry the same energy, but only the Barker code separates the targets (ΔR<sub>c</sub> = 150 m vs 1950 m). Lower the SNR to −10 dB: the received signal is buried, yet the MF peak still stands out thanks to the processing gain 10·log₁₀(samples in pulse).</div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR ============ -->
+<section class="topic" id="calc">
+  <div class="eyebrow">Worksheet helper</div>
+  <h2>Parameter calculator</h2>
+  <p>Type the numbers from a problem (scientific notation works, e.g. 2e5). Every result shows the formula with your numbers substituted, so you can copy the working into your answer. It starts with the week 7c slide values.</p>
+  <div class="lab">
+    <div class="controls">
+      <div class="ctl"><label for="cFs">Sampling rate f<sub>s</sub> (Hz)</label><input type="text" id="cFs" value="2e5" inputmode="decimal"></div>
+      <div class="ctl"><label for="cPri">PRI (s)</label><input type="text" id="cPri" value="1e-3" inputmode="decimal"></div>
+      <div class="ctl"><label for="cDc">Duty cycle (0–1)</label><input type="text" id="cDc" value="0.1" inputmode="decimal"></div>
+      <div class="ctl"><label for="cTau">or pulse width τ (s), overrides DC</label><input type="text" id="cTau" value="" placeholder="leave empty to use DC" inputmode="decimal"></div>
+      <div class="ctl"><label for="cR">Target range R₀ (m)</label><input type="text" id="cR" value="3700" inputmode="decimal"></div>
+      <div class="ctl"><label for="cN">Chips per pulse N (1 = plain)</label><input type="text" id="cN" value="1" inputmode="decimal"></div>
+    </div>
+    <div class="tablewrap"><table><thead><tr><th>Quantity</th><th>Formula</th><th>Working</th><th>Result</th></tr></thead><tbody id="calcBody"></tbody></table></div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section class="topic" id="quiz">
+  <div class="eyebrow">Check yourself</div>
+  <h2>Quiz</h2>
+  <div class="numq">
+    <div class="lab-head"><h3>Numeric problem</h3><span class="tag" id="nqTag"></span></div>
+    <p id="nqText"></p>
+    <div class="row"><input type="text" id="nqIn" inputmode="decimal" aria-label="Your answer"><span id="nqUnit" class="note"></span>
+      <button class="primary" id="nqCheck">Check</button><button id="nqShow">Show solution</button><button id="nqNext">New problem</button></div>
+    <div id="nqFb"></div>
+    <div class="sol" id="nqSol" hidden></div>
+  </div>
+  <h3>Concept questions</h3>
+  <div class="qgrid" id="mcqs"></div>
+</section>
+</div>
+
+<script>
+(()=>{
+const c=3e8;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const $=id=>document.getElementById(id);
+const redraws=[];
+function rgba(hex,a){hex=hex.replace('#','');if(hex.length===3)hex=hex.split('').map(x=>x+x).join('');const n=parseInt(hex,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+function si(v,unit,d=3){if(!isFinite(v))return '—';if(v===0)return '0 '+unit;const P=[[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n']];const a=Math.abs(v);for(const[f,p]of P){if(a>=f*0.9995)return +(v/f).toPrecision(d)+' '+p+unit;}return +(v/1e-9).toPrecision(d)+' n'+unit;}
+const num=(v,d=4)=>+(+v).toPrecision(d)+'';
+let seed=12345;function rng(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
+function gauss(){let u=0,v=0;while(u===0)u=rng();v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+function setup(cv){const dpr=window.devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);return{ctx,w,h};}
+function ticks(a,b,n=5){const span=b-a;if(!(span>0))return[a];let step=Math.pow(10,Math.floor(Math.log10(span/n)));const e=span/n/step;if(e>=7.5)step*=10;else if(e>=3.5)step*=5;else if(e>=1.5)step*=2;const out=[];for(let v=Math.ceil(a/step-1e-9)*step;v<=b+step*1e-9;v+=step)out.push(+v.toFixed(10));return out;}
+const tk=v=>{if(Math.abs(v)<1e-12)return '0';const a=Math.abs(v);if(a>=1e5||a<1e-3)return v.toExponential(0);return +v.toPrecision(4)+'';};
+
+function plot(cv,o){
+  const{ctx,w,h}=setup(cv);const m={l:46,r:12,t:12,b:34};
+  const[x0,x1]=o.x,[y0,y1]=o.y;const pw=w-m.l-m.r,ph=h-m.t-m.b;
+  const X=v=>m.l+(v-x0)/(x1-x0)*pw,Y=v=>m.t+ph-(v-y0)/(y1-y0)*ph;
+  const mono=css('--font-mono'),muted=css('--muted'),grid=css('--grid'),ink=css('--ink');
+  ctx.font='11px '+mono;ctx.lineWidth=1;
+  ctx.strokeStyle=grid;ctx.fillStyle=muted;ctx.textAlign='center';ctx.textBaseline='top';
+  for(const t of ticks(x0,x1,Math.max(3,Math.floor(pw/80)))){const x=X(t);ctx.beginPath();ctx.moveTo(x,m.t);ctx.lineTo(x,m.t+ph);ctx.stroke();ctx.fillText(tk(t),x,m.t+ph+4);}
+  ctx.textAlign='right';ctx.textBaseline='middle';
+  for(const t of ticks(y0,y1,Math.max(2,Math.floor(ph/45)))){const y=Y(t);ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(m.l+pw,y);ctx.stroke();ctx.fillText(tk(t),m.l-5,y);}
+  ctx.textAlign='center';ctx.textBaseline='bottom';if(o.xlabel)ctx.fillText(o.xlabel,m.l+pw/2,h-1);
+  if(o.ylabel){ctx.save();ctx.translate(11,m.t+ph/2);ctx.rotate(-Math.PI/2);ctx.textBaseline='middle';ctx.fillText(o.ylabel,0,0);ctx.restore();}
+  ctx.save();ctx.beginPath();ctx.rect(m.l,m.t,pw,ph);ctx.clip();
+  for(const b of(o.bands||[])){ctx.fillStyle=rgba(b.color,b.alpha??.12);ctx.fillRect(X(b.from),m.t,X(b.to)-X(b.from),ph);}
+  for(const s of o.series){
+    ctx.strokeStyle=s.color;ctx.fillStyle=s.color;ctx.lineWidth=s.width||1.8;ctx.setLineDash(s.dash||[]);
+    if(s.rects){for(const[a,b,hh]of s.rects){ctx.fillStyle=rgba(s.color,.85);ctx.fillRect(X(a),Y(hh),Math.max(1.5,X(b)-X(a)),Y(0)-Y(hh));}}
+    else if(s.stem){for(let i=0;i<s.xs.length;i++){const x=X(s.xs[i]),y=Y(s.ys[i]);ctx.beginPath();ctx.moveTo(x,Y(Math.max(y0,0)));ctx.lineTo(x,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,2.6,0,7);ctx.fill();}}
+    else{ctx.beginPath();for(let i=0;i<s.xs.length;i++){const x=X(s.xs[i]),y=Y(s.ys[i]);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}
+  }
+  ctx.setLineDash([]);
+  for(const v of(o.vlines||[])){ctx.strokeStyle=v.color;ctx.setLineDash([4,4]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(X(v.x),m.t);ctx.lineTo(X(v.x),m.t+ph);ctx.stroke();ctx.setLineDash([]);if(v.label){ctx.fillStyle=v.color;ctx.textAlign=X(v.x)>m.l+pw-60?'right':'left';ctx.textBaseline='top';ctx.fillText(v.label,X(v.x)+(ctx.textAlign==='left'?4:-4),m.t+2);}}
+  ctx.restore();
+  ctx.strokeStyle=rgba(ink.startsWith('#')?ink:'#888888',.35);ctx.strokeRect(m.l+.5,m.t+.5,pw-1,ph-1);
+}
+function ro(el,items){$(el).innerHTML=items.map(([k,v,cls])=>`<div class="ro"><span>${k}</span><b${cls?` class="${cls}"`:''}>${v}</b></div>`).join('');}
+function bind(ids,fmts,fn){ids.forEach((id,i)=>{const el=$(id);const upd=()=>{if(fmts[i]&&$(id+'O'))$(id+'O').textContent=fmts[i](+el.value);};el.addEventListener('input',()=>{upd();fn();});upd();});redraws.push(fn);}
+
+/* ---------- 1. block diagram ---------- */
+const BLK={
+ wg:['Waveform generator','Creates the baseband pulse x(t): a rectangle, a Barker-coded pulse or an LFM chirp. In the course this is the "BWG" (baseband waveform generator) followed by a DAC.'],
+ mixu:['Mixer (up-conversion)','Multiplies the baseband pulse by cos(2πf_c t) from the oscillator, moving it up to the carrier frequency f_c.'],
+ pa:['Power amplifier','Raises the signal to the transmit power. Its peak-power limit is why we cannot simply raise the amplitude A, which leads to pulse compression in week 4.'],
+ dup:['Duplexer','Switches the single antenna between transmit and receive. While transmitting, the receiver is blocked, so echoes that arrive during a pulse are lost.'],
+ ant:['Antenna','Radiates the pulse and collects the echo. A directional antenna points its main beam along the boresight. Its pattern is the same for Tx and Rx.'],
+ lna:['Low-noise amplifier (LNA)','Amplifies the very weak echo while adding as little noise as possible. Noise added here is what the matched filter later fights.'],
+ mixd:['Mixer + local oscillator (I/Q)','Mixes with cos(2πf_c t) and −sin(2πf_c t) to get the I and Q channels. This brings the echo back to baseband as a complex signal.'],
+ lpf:['IF amplifier / LPF','Low-pass filters remove the 2f_c terms left by mixing, leaving y_I(t) and y_Q(t).'],
+ adc:['ADC','Samples at rate f_s. This creates the range bins: each sample is a slice of c/(2f_s) metres.'],
+ sp:['Signal processor','Your project lives here: matched filtering, pulse compression, Doppler FFT and the data cube.'],
+ dp:['Data processor / display','Turns detections into tracks and displays for the end user.']
+};
+function chain(el,label,keys){const box=$(el);box.innerHTML=`<span class="lbl">${label}</span>`+keys.map((k,i)=>`${i?'<span class="arr">→</span>':''}<button class="blk" data-k="${k}" aria-pressed="false">${BLK[k][0]}</button>`).join('');}
+chain('chainTx','Tx',['wg','mixu','pa','dup','ant']);chain('chainRx','Rx',['ant','dup','lna','mixd','lpf','adc','sp','dp']);
+document.querySelectorAll('.blk').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.blk').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===b.dataset.k)); const[t,d]=BLK[b.dataset.k];$('blkInfo').innerHTML=`<b>${t}.</b> ${d}`;}));
+
+function drawWave(){
+  const{ctx,w,h}=setup($('cvWave'));const rows=[['CW',t=>Math.cos(2*Math.PI*14*t)],['Pulsed',t=>{const p=t%0.25;return p<0.07?Math.cos(2*Math.PI*40*t):0;}],['FMCW',t=>{const p=t%0.5;return Math.cos(2*Math.PI*(4*p+60*p*p));}]];
+  const lh=h/3,mono=css('--font-mono');ctx.font='12px '+mono;
+  rows.forEach(([name,f],i)=>{const y0=lh*i+lh/2;ctx.fillStyle=css('--muted');ctx.textBaseline='middle';ctx.fillText(name,8,y0);ctx.strokeStyle=css('--tx');ctx.lineWidth=1.4;ctx.beginPath();const L=70,W=w-L-10;for(let px=0;px<=W;px++){const t=px/W;const y=y0-f(t)*lh*0.36;px?ctx.lineTo(L+px,y):ctx.moveTo(L+px,y);}ctx.stroke();});
+}
+redraws.push(drawWave);
+
+/* ---------- 2a. data cube ---------- */
+function cube(){
+  const fs=+$('dcFs').value*1e3,PRI=+$('dcPri').value*1e-3,DC=+$('dcDc').value,R0=+$('dcR').value*1e3,M=+$('dcM').value,snr=+$('dcSnr').value,mf=$('dcMf').value==='mf';
+  const N=Math.max(2,Math.round(PRI*fs)),L=Math.max(1,Math.round(DC*PRI*fs)),k0true=Math.round(2*R0/c*fs),k0=k0true%N;
+  const sig=Math.sqrt(Math.pow(10,-snr/10)/2);seed=777;
+  const data=[];
+  for(let m=0;m<M;m++){const re=new Float64Array(N),im=new Float64Array(N);for(let l=0;l<N;l++){re[l]=sig*gauss();im[l]=sig*gauss();}for(let i=0;i<L;i++){const l=k0+i;if(l<N)re[l]+=1;}
+    let col;if(mf){col=new Float64Array(N);for(let l=0;l<N;l++){let a=0,b=0;for(let i=0;i<L&&l+i<N;i++){a+=re[l+i];b+=im[l+i];}col[l]=Math.hypot(a,b);}}else{col=new Float64Array(N);for(let l=0;l<N;l++)col[l]=Math.hypot(re[l],im[l]);}
+    data.push(col);}
+  const lo=Math.max(0,Math.min(k0-15,N-60)),hi=Math.min(N,Math.max(lo+30,k0+(mf?16:L+12)),lo+120);
+  let mx=0;for(const col of data)for(let l=lo;l<hi;l++)mx=Math.max(mx,col[l]);
+  const{ctx,w,h}=setup($('cvCube'));const mg={l:56,r:12,t:12,b:34};const pw=w-mg.l-mg.r,ph=h-mg.t-mg.b;const cw=pw/M,ch=ph/(hi-lo);
+  const tx=css('--tx'),muted=css('--muted');ctx.fillStyle=css('--surface');ctx.fillRect(mg.l,mg.t,pw,ph);
+  for(let m=0;m<M;m++)for(let l=lo;l<hi;l++){const v=data[m][l]/mx;ctx.fillStyle=rgba(tx,Math.min(1,Math.pow(v,1.3)));ctx.fillRect(mg.l+m*cw,mg.t+(l-lo)*ch,Math.ceil(cw),Math.ceil(ch));}
+  ctx.font='11px '+css('--font-mono');ctx.fillStyle=muted;ctx.textAlign='center';ctx.textBaseline='top';
+  const mStep=M>16?4:2;for(let m=0;m<M;m+=mStep)ctx.fillText(m,mg.l+(m+.5)*cw,mg.t+ph+4);
+  ctx.textBaseline='bottom';ctx.fillText('slow time: pulse m  (spacing = PRI)',mg.l+pw/2,h-1);
+  ctx.textAlign='right';ctx.textBaseline='middle';const lStep=Math.max(1,Math.ceil((hi-lo)/10));for(let l=lo;l<hi;l+=lStep)ctx.fillText(l,mg.l-6,mg.t+(l-lo+.5)*ch);
+  ctx.save();ctx.translate(11,mg.t+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('fast time: range bin l',0,0);ctx.restore();
+  const echo=css('--echo');ctx.fillStyle=echo;ctx.beginPath();const yk=mg.t+(k0-lo+.5)*ch;ctx.moveTo(mg.l-3,yk);ctx.lineTo(mg.l-10,yk-5);ctx.lineTo(mg.l-10,yk+5);ctx.fill();
+  const bin=c/(2*fs),amb=k0true>=N;
+  ro('cubeRO',[['samples / PRI N',N],['pulse samples L',L],['bin size c/2fs',si(bin,'m')],['target bin k₀',`${k0}  (bin ${k0+1} counting from 1)`],['τ = DC·PRI',si(DC*PRI,'s')],['ΔR = cτ/2',si(c*DC*PRI/2,'m')],['R_ua',si(c*(PRI-DC*PRI)/2,'m')],['status',amb?'ambiguous: wrapped':'in range',amb?'bad':'ok']]);
+}
+bind(['dcFs','dcPri','dcDc','dcR','dcM','dcSnr'],[v=>si(v*1e3,'Hz'),v=>si(v*1e-3,'s'),v=>num(v,3),v=>si(v*1e3,'m'),v=>v,v=>v+' dB'],cube);
+$('dcMf').addEventListener('change',cube);
+
+/* ---------- 2b. DFT ---------- */
+function dft(){
+  const fs=64,f0=+$('dfF0').value,N=+$('dfN').value,K=+$('dfK').value,Ne=Math.min(N,K);
+  const D=f=>{const d=(f0-f)/fs;const s=Math.sin(Math.PI*d);return Math.abs(s)<1e-9?Ne:Math.abs(Math.sin(Math.PI*Ne*d)/s);};
+  const fx=[],fy=[];for(let i=0;i<=1200;i++){const f=-fs/2+fs*i/1200;fx.push(f);fy.push(D(f));}
+  const kx=[],ky=[];for(let k=-K/2;k<K/2;k++){const f=k*fs/K;kx.push(f);ky.push(D(f));}
+  plot($('cvDft'),{x:[-fs/2,fs/2],y:[0,Ne*1.12],xlabel:'frequency (Hz), fs = 64 Hz',ylabel:'|X|',series:[{xs:fx,ys:fy,color:css('--muted'),width:1.3},{xs:kx,ys:ky,color:css('--echo'),stem:true,width:1.2}],vlines:[{x:f0,color:css('--tx'),label:'f₀'}]});
+  const onGrid=Math.abs(f0*K/fs-Math.round(f0*K/fs))<1e-9;
+  ro('dftRO',[['bin spacing fs/K',num(fs/K)+' Hz'],['true resolution ≈ fs/N',num(fs/Ne)+' Hz'],['observation time N/fs',num(Ne/fs)+' s'],['f₀ on bin grid?',onGrid?'yes: no leakage':'no: leakage',onGrid?'ok':'warn'],['peak height',num(Math.max(...ky),3)+` (max ${Ne})`]].concat(K<N?[['note','K < N: signal truncated','bad']]:[]));
+}
+bind(['dfF0','dfN'],[v=>v+' Hz',v=>v],dft);$('dfK').addEventListener('change',dft);
+
+/* ---------- 3a. echo timing ---------- */
+function echo(){
+  const R=+$('etR').value*1e3,tau=+$('etTau').value*1e-6,PRI=+$('etPri').value*1e-3;
+  const t0=2*R/c,app=t0%PRI,Rua=c*(PRI-tau)/2;
+  const blind=app<tau||app+tau>PRI,amb=t0>=PRI;
+  const us=1e6,txR=[],ecR=[];for(let k=0;k<3;k++){txR.push([k*PRI*us,(k*PRI+tau)*us,1]);const s=k*PRI+t0;if(s<3*PRI)ecR.push([s*us,(s+tau)*us,.45]);}
+  plot($('cvEcho'),{x:[0,3*PRI*us],y:[0,1.15],xlabel:'time (µs)',ylabel:'amplitude',series:[{rects:txR,color:css('--tx')},{rects:ecR,color:css('--echo')}],vlines:[{x:t0*us,color:css('--echo'),label:'echo of pulse 1'}]});
+  let st,cl;if(blind){st='eclipsed: echo hits a Tx pulse';cl='bad';}else if(amb){st=`ambiguous: looks like ${si(c*app/2,'m')}`;cl='warn';}else{st='unambiguous';cl='ok';}
+  ro('echoRO',[['delay t₀ = 2R/c',si(t0,'s')],['R_ua = c(PRI−τ)/2',si(Rua,'m')],['min range / ΔR = cτ/2',si(c*tau/2,'m')],['PRF',si(1/PRI,'Hz')],['duty cycle',num(tau/PRI,3)],['status',st,cl]]);
+}
+bind(['etR','etTau','etPri'],[v=>v+' km',v=>v+' µs',v=>v+' ms'],echo);
+
+/* ---------- 3b. resolution ---------- */
+function res(){
+  const tau=+$('rsTau').value*1e-6,sep=+$('rsSep').value,W=c*tau/2,B=1/tau;
+  const fx=[],fy=[];for(let i=0;i<=800;i++){const f=-5e6+1e7*i/800;const x=f*tau;fx.push(f/1e6);fy.push(Math.abs(x)<1e-9?1:Math.abs(Math.sin(Math.PI*x)/(Math.PI*x)));}
+  plot($('cvSpec'),{x:[-5,5],y:[0,1.1],xlabel:'frequency (MHz)',ylabel:'|X(f)|',series:[{xs:fx,ys:fy,color:css('--tx')}],vlines:[{x:-B/1e6,color:css('--echo')},{x:B/1e6,color:css('--echo'),label:'1/τ'}]});
+  const R1=1000,R2=R1+sep,x0=Math.max(0,R1-W-200),x1=R2+W+200,tri=(r,Rc)=>Math.max(0,1-Math.abs(r-Rc)/W);
+  const xs=[],a=[],b=[],s=[];for(let i=0;i<=600;i++){const r=x0+(x1-x0)*i/600;xs.push(r);a.push(tri(r,R1));b.push(tri(r,R2));s.push(a[i]+b[i]);}
+  plot($('cvRes'),{x:[x0,x1],y:[0,2.1],xlabel:'range (m)',ylabel:'MF out',series:[{xs,ys:a,color:css('--muted'),dash:[4,3],width:1.2},{xs,ys:b,color:css('--muted'),dash:[4,3],width:1.2},{xs,ys:s,color:css('--mf'),width:2}]});
+  const mid=tri((R1+R2)/2,R1)+tri((R1+R2)/2,R2),peak=Math.max(...s);
+  let st,cl;if(sep>W*1.001){st='resolved: dip between peaks';cl='ok';}else if(sep>W*0.999){st='at the limit: flat top';cl='warn';}else{st='merged into one target';cl='bad';}
+  ro('resRO',[['bandwidth B ≈ 1/τ',si(B,'Hz')],['ΔR = cτ/2',si(W,'m')],['target spacing',si(sep,'m')],['valley / peak',num(mid/peak,3)],['result',st,cl]]);
+}
+bind(['rsTau','rsSep'],[v=>v+' µs',v=>v+' m'],res);
+
+/* ---------- 4. barker ---------- */
+const CODES={2:[1,-1],3:[1,1,-1],4:[1,1,-1,1],5:[1,1,1,-1,1],7:[1,1,1,-1,-1,1,-1],11:[1,1,1,-1,-1,-1,1,-1,-1,1,-1],13:[1,1,1,1,1,-1,-1,1,1,-1,1,-1,1]};
+let bkSeed=4242;
+function barker(){
+  const fs=4e6,spc=4,n=+$('bkN').value,plain=$('bkType').value==='plain',snr=+$('bkSnr').value,two=$('bkTwo').value==='2';
+  const R1=+$('bkR1').value,R2=+$('bkR2').value;
+  const code=plain?Array(n).fill(1):CODES[n];const x=[];code.forEach(v=>{for(let i=0;i<spc;i++)x.push(v);});const L=x.length;
+  const Nw=Math.round(7000*2/c*fs)+L;const re=new Float64Array(Nw),im=new Float64Array(Nw);
+  seed=bkSeed;const sig=Math.sqrt(Math.pow(10,-snr/10)/2);for(let i=0;i<Nw;i++){re[i]=sig*gauss();im[i]=sig*gauss();}
+  const ks=[Math.round(2*R1/c*fs)];if(two)ks.push(Math.round(2*R2/c*fs));for(const k of ks)for(let i=0;i<L;i++)if(k+i<Nw)re[k+i]+=x[i];
+  const z=new Float64Array(Nw);for(let l=0;l<Nw;l++){let a=0,b=0;for(let i=0;i<L&&l+i<Nw;i++){a+=re[l+i]*x[i];b+=im[l+i]*x[i];}z[l]=Math.hypot(a,b);}
+  const rOf=l=>l*c/(2*fs)/1e3;const rx=[],ry=[],zy=[];for(let l=0;l<Nw-L;l++){rx.push(rOf(l));ry.push(re[l]);zy.push(z[l]);}
+  const tx=[],ty=[];x.forEach((v,i)=>{tx.push(i/spc,(i+1)/spc);ty.push(v,v);});
+  plot($('cvBkTx'),{x:[0,Math.max(13,n)],y:[-1.4,1.4],xlabel:'transmitted pulse: time (µs)',ylabel:'x(t)',series:[{xs:tx,ys:ty,color:css('--tx')}]});
+  const ya=Math.max(2,...ry.map(Math.abs));
+  plot($('cvBkRx'),{x:[0,rx[rx.length-1]],y:[-ya,ya],xlabel:'received Re{y}: range (km)',ylabel:'y',series:[{xs:rx,ys:ry,color:css('--echo'),width:1}]});
+  const zm=Math.max(...zy);const vl=[{x:R1/1e3,color:css('--muted'),label:'T1'}];if(two)vl.push({x:R2/1e3,color:css('--muted'),label:'T2'});
+  plot($('cvBkMf'),{x:[0,rx[rx.length-1]],y:[0,zm*1.1],xlabel:'matched-filter output |z|: range (km)',ylabel:'|z|',series:[{xs:rx,ys:zy,color:css('--mf'),width:1.8}],vlines:vl});
+  // noiseless autocorrelation for PSL
+  let pk=0,sl=0;for(let lag=-(L-1);lag<L;lag++){let s=0;for(let i=0;i<L;i++){const j=i+lag;if(j>=0&&j<L)s+=x[i]*x[j];}const a=Math.abs(s);if(lag===0)pk=a;else if(Math.abs(lag)>=spc)sl=Math.max(sl,a);}
+  let best=0;for(let l=1;l<zy.length;l++)if(zy[l]>zy[best])best=l;
+  const tau=n*1e-6,tc=plain?tau:1e-6;
+  $('bkCode').textContent=plain?`Plain pulse, ${n} µs long`:`Barker-${n} chips: ${CODES[n].map(v=>v>0?'+':'−').join(' ')}`;
+  ro('bkRO',[['pulse length τ',si(tau,'s')],['chip τc',si(tc,'s')],['bandwidth ≈ 1/τc',si(1/tc,'Hz')],['ΔR = cτc/2',si(c*tc/2,'m')],['energy Σ|x|²',L+' (same either way)'],['peak sidelobe',sl?num(20*Math.log10(sl/pk),3)+' dB':'none (−∞)'],['MF gain 10log₁₀(L)',num(10*Math.log10(L),3)+' dB'],['strongest peak at',si(rx[best]*1e3,'m')],['T1 vs T2 spacing',two?si(Math.abs(R2-R1),'m'):'—',two?(Math.abs(R2-R1)>c*tc/2?'ok':'bad'):'']]);
+}
+bind(['bkSnr','bkR1','bkR2'],[v=>v+' dB',v=>si(v,'m'),v=>si(v,'m')],barker);
+['bkType','bkN','bkTwo'].forEach(id=>$(id).addEventListener('change',barker));
+$('bkNoise').addEventListener('click',()=>{bkSeed=Math.floor(Math.random()*1e9);barker();});
+
+/* ---------- calculator ---------- */
+function calc(){
+  const g=id=>{const v=parseFloat($(id).value);return isFinite(v)?v:NaN;};
+  const fs=g('cFs'),PRI=g('cPri'),DC=g('cDc'),R0=g('cR'),N=Math.max(1,Math.round(g('cN')||1));let tau=g('cTau');const fromDC=!isFinite(tau);if(fromDC)tau=DC*PRI;
+  const tc=tau/N,B=1/tc,dR=c*tc/2,bin=c/(2*fs),Rua=c*(PRI-tau)/2,Ns=PRI*fs,L=tau*fs,t0=2*R0/c,k0=Math.round(t0*fs);
+  const e=v=>num(v,4);
+  const rows=[
+    ['Pulse width τ',fromDC?'τ = DC·PRI':'given',fromDC?`${e(DC)} × ${e(PRI)}`:'',si(tau,'s')],
+    ['Chip width τc','τc = τ / N',`${e(tau)} / ${N}`,si(tc,'s')],
+    ['Bandwidth B','B ≈ 1/τc',`1 / ${e(tc)}`,si(B,'Hz')],
+    ['Range resolution ΔR','ΔR = c/(2B) = cτc/2',`3e8 × ${e(tc)} / 2`,si(dR,'m')],
+    ['PRF','PRF = 1/PRI',`1 / ${e(PRI)}`,si(1/PRI,'Hz')],
+    ['Max unambiguous range','R_ua = c(PRI − τ)/2',`3e8 × (${e(PRI)} − ${e(tau)}) / 2`,si(Rua,'m')+`  (≈ cPRI/2 = ${si(c*PRI/2,'m')})`],
+    ['Bin size','ΔR_bin = c/(2fs)',`3e8 / (2 × ${e(fs)})`,si(bin,'m')],
+    ['Samples per PRI','N = PRI·fs',`${e(PRI)} × ${e(fs)}`,e(Ns)],
+    ['Samples per pulse','L = τ·fs',`${e(tau)} × ${e(fs)}`,e(L)],
+    ['Samples per resolution cell','fs / B',`${e(fs)} / ${e(B)}`,e(fs/B)],
+    ['Echo delay','t₀ = 2R₀/c',`2 × ${e(R0)} / 3e8`,si(t0,'s')],
+    ['Target bin','k₀ = round(t₀·fs)',`round(${e(t0*fs)})`,`${k0}  (counting from 1: bin ${k0+1})`],
+    ['Estimated range','R̂ = c·k₀/(2fs)',`3e8 × ${k0} / (2 × ${e(fs)})`,si(c*k0/(2*fs),'m')+`  (error ${si(c*k0/(2*fs)-R0,'m')})`],
+    ['Status','t₀ vs PRI',`${e(t0)} vs ${e(PRI)}`,t0<PRI-tau?'<span class="ok">unambiguous</span>':'<span class="bad">beyond R_ua: ambiguous or eclipsed</span>']
+  ];
+  $('calcBody').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td class="mono">${r[1]}</td><td class="mono">${r[2]}</td><td class="mono"><b>${r[3]}</b></td></tr>`).join('');
+}
+['cFs','cPri','cDc','cTau','cR','cN'].forEach(id=>$(id).addEventListener('input',calc));calc();
+
+/* ---------- quiz ---------- */
+let right=0,tried=0;const score=()=>{$('scoreTop').textContent=`score ${right} / ${tried}`;};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const GENS=[
+ ()=>{const t=pick([0.5,1,2,5,10,20]);const a=c*t*1e-6/2;return{tag:'range resolution',q:`A plain rectangular pulse has width τ = ${t} µs. What is its range resolution ΔR?`,a,u:'m',s:`ΔR = cτ/2 = 3·10⁸ × ${t}·10⁻⁶ / 2 = ${num(a)} m`};},
+ ()=>{const B=pick([0.5,1,2,5,10,50]);const a=c/(2*B*1e6);return{tag:'bandwidth',q:`A waveform has bandwidth B = ${B} MHz. What range resolution does it give?`,a,u:'m',s:`ΔR = c/(2B) = 3·10⁸ / (2 × ${B}·10⁶) = ${num(a)} m`};},
+ ()=>{const p=pick([0.5,1,2,4,5,10]);const a=c/(2*p*1e3)/1e3;return{tag:'ambiguity',q:`A radar has PRF = ${p} kHz. Ignoring τ, what is the maximum unambiguous range?`,a,u:'km',s:`PRI = 1/PRF = ${num(1/p)} ms\nR_ua ≈ c·PRI/2 = 3·10⁸ × ${num(1/(p*1e3))} / 2 = ${num(a)} km`};},
+ ()=>{const f=pick([0.2,1,2,5,10,20]);const a=c/(2*f*1e6);return{tag:'sampling',q:`The ADC samples at f_s = ${f} MHz. How many metres does one range bin cover?`,a,u:'m',s:`ΔR_bin = c/(2f_s) = 3·10⁸ / (2 × ${f}·10⁶) = ${num(a)} m`};},
+ ()=>{const R=pick([1.5,3,4.5,6,7.5,12]),f=pick([1,2,4]);const a=Math.round(2*R*1e3/c*f*1e6);return{tag:'signal model',q:`A target is at R₀ = ${R} km and f_s = ${f} MHz. By how many samples k₀ is the echo delayed?`,a,u:'samples',s:`t₀ = 2R₀/c = 2 × ${R*1e3} / 3·10⁸ = ${num(2*R*1e3/c*1e6)} µs\nk₀ = round(t₀·f_s) = round(${num(2*R*1e3/c*f*1e6)}) = ${a}`};},
+ ()=>{const n=pick([5,7,11,13]),tc=pick([0.5,1,2]);const a=c*tc*1e-6/2;return{tag:'pulse compression',q:`A Barker-${n} pulse has total length ${n*tc} µs. What is its compressed range resolution ΔR_c?`,a,u:'m',s:`τ_c = τ/N = ${n*tc}/${n} = ${tc} µs\nΔR_c = cτ_c/2 = 3·10⁸ × ${tc}·10⁻⁶ / 2 = ${num(a)} m\n(a plain pulse of the same length gives ${num(c*n*tc*1e-6/2)} m)`};},
+ ()=>{const t=pick([10,20,50,100,200,400]);const a=c*t*1e-6/2/1e3;return{tag:'ranging',q:`An echo arrives t₀ = ${t} µs after transmission. What is the target range?`,a,u:'km',s:`R₀ = c·t₀/2 = 3·10⁸ × ${t}·10⁻⁶ / 2 = ${num(a)} km`};},
+ ()=>{const d=pick([0.05,0.1,0.2]),p=pick([0.5,1,2]);const a=d*p*1e3;return{tag:'terminology',q:`Duty cycle DC = ${d} and PRI = ${p} ms. What is the pulse width τ?`,a,u:'µs',s:`τ = DC·PRI = ${d} × ${p} ms = ${num(a)} µs`};},
+ ()=>{const n=pick([5,7,11,13]);const a=20*Math.log10(1/n);return{tag:'Barker',q:`What is the peak sidelobe level of a Barker-${n} code's matched-filter output, in dB?`,a,u:'dB',s:`peak = N = ${n}, largest sidelobe = 1\nPSL = 20·log₁₀(1/${n}) = ${num(a)} dB`};}
+];
+let cur;
+function nextQ(){cur=pick(GENS)();$('nqTag').textContent=cur.tag;$('nqText').textContent=cur.q;$('nqUnit').textContent=cur.u;$('nqIn').value='';$('nqFb').innerHTML='';$('nqSol').hidden=true;$('nqSol').textContent=cur.s;cur.done=false;}
+$('nqCheck').addEventListener('click',()=>{const v=parseFloat($('nqIn').value);if(!isFinite(v)){$('nqFb').innerHTML='<span class="pill warn">Type a number first, e.g. 150 or 1.5e2</span>';return;}
+  const ok=Math.abs(v-cur.a)<=Math.abs(cur.a)*0.02+1e-9;if(!cur.done){tried++;if(ok)right++;cur.done=true;score();}
+  $('nqFb').innerHTML=ok?'<span class="pill ok">Correct</span>':`<span class="pill bad">Not quite. Expected ${num(cur.a)} ${cur.u}</span>`;$('nqSol').hidden=false;});
+$('nqShow').addEventListener('click',()=>{$('nqSol').hidden=false;});
+$('nqNext').addEventListener('click',nextQ);
+$('nqIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('nqCheck').click();});
+nextQ();
+
+const MCQ=[
+ ['If you double the sampling rate f_s, the range resolution ΔR…',['halves','stays the same','doubles','depends on the PRF'],1,'ΔR = c/(2B) depends only on the pulse bandwidth. Raising f_s gives smaller bins (more samples per resolution cell), not better resolution.'],
+ ['Why does the receiver keep the signal complex (I and Q)?',['To double the SNR','To keep the phase, which carries Doppler information','Because the ADC requires it','To remove clutter'],1,'One complex sample stores both amplitude and phase. Doppler shows up as a phase rotation from pulse to pulse.'],
+ ['Zero-padding a signal before the FFT (bigger K, same N)…',['improves frequency resolution','samples the same DTFT more densely','removes spectral leakage in all cases','reduces noise'],1,'The DTFT shape is set by N. Larger K only draws it with more points. It can hide leakage if a bin happens to land on f₀, but resolution stays ≈ fs/N.'],
+ ['The matched filter impulse response is…',['h[n] = x[n]','h[n] = x*[−n]','h[n] = 1/x[n]','an ideal low-pass filter'],1,'h[n] = x*[−n]: the transmitted pulse, time-reversed and conjugated. Filtering with it is the same as correlating y with x.'],
+ ['The peak output SNR of a matched filter in white noise depends on…',['the pulse shape','the pulse energy only','the PRF','the number of range bins'],1,'Peak SNR = E/N₀. That is why a long, coded pulse detects as well as a long plain pulse while resolving like a short one.'],
+ ['Why can\'t we get more pulse energy just by increasing the amplitude A?',['It would reduce bandwidth','The transmitter has a peak-power limit','It would cause aliasing','It changes the carrier'],1,'Peak power is capped by the amplifier hardware. The only way to add energy is a longer pulse, which pulse compression makes usable.'],
+ ['An echo arrives after the next pulse has already been transmitted. The radar…',['measures it correctly','reports the target closer than it is','reports it farther away','sees it at zero Doppler'],1,'The receiver times the echo from the most recent pulse, so the apparent delay is t₀ mod PRI. This is range ambiguity.'],
+ ['In the data cube y[l, m], the fast-time index l corresponds to…',['the pulse number','range','Doppler frequency','antenna element'],1,'l counts samples inside one PRI, so each l is a range bin of width c/(2fs). m counts pulses (slow time).'],
+ ['Barker-13 compared with a plain pulse of the same length:',['same bandwidth, more energy','about 13× the bandwidth, same energy','13× less energy','same resolution'],1,'Chips are 13× shorter, so the bandwidth grows ~13× and ΔR improves 13×. Energy is still A²τ.'],
+ ['Spectral leakage appears when…',['the tone falls between DFT bins','N is a power of two','the signal is complex','fs is too high'],0,'If f₀ is not an integer multiple of fs/K, no bin sits on the peak and the sinc sidelobes are sampled at non-zero points.']
+];
+$('mcqs').innerHTML=MCQ.map((q,i)=>`<div class="mcq" data-i="${i}"><b>${i+1}. ${q[0]}</b><div class="opts">${q[1].map((o,j)=>`<button data-j="${j}">${o}</button>`).join('')}</div><div class="why" hidden></div></div>`).join('');
+document.querySelectorAll('.mcq').forEach(box=>{const q=MCQ[+box.dataset.i];box.querySelectorAll('.opts button').forEach(b=>b.addEventListener('click',()=>{if(box.dataset.done)return;box.dataset.done=1;const j=+b.dataset.j;tried++;if(j===q[2])right++;score();box.querySelectorAll('.opts button').forEach(x=>{if(+x.dataset.j===q[2])x.classList.add('right');else if(x===b)x.classList.add('wrong');});const w=box.querySelector('.why');w.hidden=false;w.textContent=(j===q[2]?'Correct. ':'Not quite. ')+q[3];}));});
+
+/* ---------- redraw on theme/resize ---------- */
+const all=()=>redraws.forEach(f=>{try{f();}catch(e){console.error(e);}});
+all();
+let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(all,80);}).observe(document.body);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',all);
+new MutationObserver(all).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script>
+
+</body></html>
