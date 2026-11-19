@@ -1,14 +1,23 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Radar Part 1 Lab</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','canvas']}};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
 <style>
-/* Layout: a single reading column; each topic = short theory, then an instrument-like lab panel with live plots */
+/* Layout: a single reading column of lessons; each lesson = numbered sub-steps of explanation, worked examples, then instrument-like lab panels with live plots */
 :root{
   --bg:#eef2f5; --surface:#ffffff; --sunk:#f5f8fa; --ink:#13202b; --muted:#5a6a77; --line:#d3dce3; --grid:#e3e9ee;
   --tx:#0d7a85; --echo:#c25e08; --mf:#5b4fd0; --ok:#1d7f4e; --warn:#a86a00; --bad:#b4322c;
   --font-display:"Space Grotesk",system-ui,sans-serif; --font-body:"Inter",system-ui,sans-serif; --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0c1318; --surface:#131d25; --sunk:#0f181f; --ink:#e2eaf0; --muted:#93a4b1; --line:#26353f; --grid:#1c2932;
@@ -16,30 +25,57 @@
 :root[data-theme="dark"]{
   --bg:#0c1318; --surface:#131d25; --sunk:#0f181f; --ink:#e2eaf0; --muted:#93a4b1; --line:#26353f; --grid:#1c2932;
   --tx:#3cc0c8; --echo:#f09c45; --mf:#a198ff; --ok:#4cc38a; --warn:#e3b04b; --bad:#f07a72; color-scheme:dark}
-body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.55}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15.5px;line-height:1.6}
+img{max-width:100%}
+[hidden]{display:none!important}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
-.wrap{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 80px}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
 header.top .in{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .brand{font-family:var(--font-display);font-weight:700;letter-spacing:.01em}
 nav.toc{display:flex;gap:6px;flex-wrap:wrap}
 nav.toc a{font-size:13px;text-decoration:none;color:var(--ink);padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--sunk)}
 nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--tx);color:var(--tx)}
+nav.toc a.done{border-color:var(--ok);color:var(--ok)}
 .score{margin-left:auto;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
-.hero{padding-block:36px 8px;display:grid;gap:10px}
+.hero{padding-block:36px 8px;display:grid;gap:12px}
 .hero h1{font-family:var(--font-display);font-size:clamp(28px,5vw,42px);line-height:1.1;margin:0;text-wrap:balance}
-.hero p{max-width:65ch;margin:0;color:var(--muted)}
+.hero p{max-width:68ch;margin:0;color:var(--muted)}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .legend span::before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:currentColor}
 .c-tx{color:var(--tx)}.c-echo{color:var(--echo)}.c-mf{color:var(--mf)}
-section.topic{padding-top:40px;display:grid;gap:14px;scroll-margin-top:70px}
+.path{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.path a{display:grid;gap:2px;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.path a:hover{border-color:var(--tx)}
+.path a span{font-size:12.5px;color:var(--muted)}
+.path a b{font-family:var(--font-display)}
+section.topic{padding-top:48px;display:grid;gap:16px;scroll-margin-top:70px}
+.step{display:grid;gap:12px;scroll-margin-top:70px;padding-top:10px}
 .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx)}
-h2{font-family:var(--font-display);font-size:26px;margin:0;line-height:1.2;text-wrap:balance}
-h3{font-family:var(--font-display);font-size:18px;margin:0}
-p{margin:0;max-width:68ch}
+h2{font-family:var(--font-display);font-size:28px;margin:0;line-height:1.2;text-wrap:balance}
+h3{font-family:var(--font-display);font-size:20px;margin:0;line-height:1.3;text-wrap:balance}
+h3 .n{font-family:var(--font-mono);font-size:14px;color:var(--tx);margin-right:8px}
+h4{font-family:var(--font-display);font-size:16px;margin:0}
+p,ul,ol{margin:0;max-width:70ch}
+ul,ol{padding-left:22px;display:grid;gap:4px}
+code,.mono{font-family:var(--font-mono);font-size:.9em}
 .formulas{display:flex;flex-wrap:wrap;gap:8px}
 .f{font-family:var(--font-mono);font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
 .f b{color:var(--tx);font-weight:500}
+.eq{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 14px;max-width:100%}
+.box{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:8px;background:var(--surface);max-width:76ch}
+.box>.lbl{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.box.key{border-color:var(--tx)}.box.key>.lbl{color:var(--tx)}
+.box.mistake{border-color:var(--bad)}.box.mistake>.lbl{color:var(--bad)}
+.box.slide>.lbl{color:var(--echo)}
+details.worked{border:1px solid var(--line);border-radius:8px;background:var(--surface);max-width:76ch}
+details.worked summary{cursor:pointer;padding:10px 14px;font-weight:600;list-style:none;display:flex;gap:8px;align-items:baseline}
+details.worked summary::before{content:"▸";color:var(--echo);transition:transform .15s}
+details.worked[open] summary::before{transform:rotate(90deg)}
+details.worked summary span{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--echo)}
+details.worked .body{padding:0 14px 14px;display:grid;gap:8px}
 .lab{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:14px;min-width:0}
 .lab-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
 .lab-head .tag{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
@@ -48,35 +84,38 @@ p{margin:0;max-width:68ch}
 .ctl label{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
 .ctl output{font-family:var(--font-mono);color:var(--ink);font-variant-numeric:tabular-nums}
 input[type=range]{width:100%;accent-color:var(--tx)}
-select,input[type=text],input[type=number]{font:inherit;font-family:var(--font-mono);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--sunk);color:var(--ink);width:100%;box-sizing:border-box}
+select,input[type=text],input[type=number]{font:inherit;font-family:var(--font-mono);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--sunk);color:var(--ink);width:100%}
 button{font:inherit;font-size:13px;font-weight:500;padding:7px 12px;border-radius:6px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);cursor:pointer}
 button:hover{border-color:var(--tx)}
 button.primary{background:var(--tx);border-color:var(--tx);color:var(--surface)}
 :focus-visible{outline:2px solid var(--tx);outline-offset:2px}
 canvas{width:100%;height:230px;display:block;background:var(--sunk);border-radius:6px}
-canvas.tall{height:300px}canvas.short{height:170px}
+canvas.tall{height:300px}canvas.short{height:170px}canvas.square{height:260px}
 .readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
-.ro{background:var(--sunk);border-radius:6px;padding:8px 10px;display:grid;gap:2px}
+.ro{background:var(--sunk);border-radius:6px;padding:8px 10px;display:grid;gap:2px;min-width:0}
 .ro span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.ro b{font-family:var(--font-mono);font-weight:500;font-variant-numeric:tabular-nums;font-size:15px}
+.ro b{font-family:var(--font-mono);font-weight:500;font-variant-numeric:tabular-nums;font-size:15px;overflow-wrap:anywhere}
 .pill{display:inline-block;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid currentColor}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
-.note{font-size:13.5px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px;max-width:72ch}
-.try{font-size:13.5px;background:var(--sunk);border-radius:6px;padding:10px 12px}
-.try b{color:var(--echo)}
+.note{font-size:13.5px;color:var(--muted);max-width:74ch}
+.try{font-size:14px;background:var(--sunk);border-radius:6px;padding:10px 12px;display:grid;gap:6px}
+.try>b:first-child{color:var(--echo);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-family:var(--font-mono);font-weight:500}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
-.two>*{min-width:0}
+.two>*{min-width:0;display:grid;gap:6px;align-content:start}
 .chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .chain .lbl{font-family:var(--font-mono);font-size:12px;color:var(--muted);width:30px}
 .chain button.blk{font-size:12.5px;padding:6px 10px}
 .chain button.blk[aria-pressed=true]{border-color:var(--tx);color:var(--tx);background:var(--surface)}
 .chain .arr{color:var(--muted)}
-.info{background:var(--sunk);border-radius:6px;padding:10px 12px;font-size:14px;min-height:3em}
-.tablewrap{overflow-x:auto}
+.info{background:var(--sunk);border-radius:6px;padding:10px 12px;font-size:14px;min-height:3em;display:grid;gap:6px}
+.tablewrap{overflow-x:auto;max-width:100%}
 table{border-collapse:collapse;width:100%;font-size:13.5px}
 th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
 td.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+pre.code{background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;line-height:1.55;margin:0;max-width:100%}
+.codehead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.codehead span{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .mcq{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--sunk)}
 .mcq .opts{display:grid;gap:6px}
 .mcq .opts button{text-align:left;background:var(--surface)}
@@ -88,14 +127,22 @@ td.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-spa
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .row input{max-width:200px}
 .sol{font-family:var(--font-mono);font-size:13px;white-space:pre-wrap}
-@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+.done-row{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--muted)}
+.done-row input{width:18px;height:18px;accent-color:var(--ok)}
+.corr{font-family:var(--font-mono);font-size:13px;overflow-x:auto}
+.corr table td,.corr table th{text-align:center;padding:4px 6px;white-space:nowrap}
+.corr td.hl{color:var(--mf);font-weight:600}
+hr.sep{border:0;border-top:1px solid var(--line);margin:8px 0;width:100%}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 html{scroll-behavior:smooth}
 </style>
+</head>
+<body>
 
 <header class="top"><div class="in">
   <div class="brand">Radar · Part 1</div>
   <nav class="toc" aria-label="Sections">
-    <a href="#basics">1 Basics</a><a href="#dsp">2 DSP</a><a href="#ranging">3 Ranging &amp; MF</a><a href="#barker">4 Barker</a><a href="#calc">Calculator</a><a href="#quiz">Quiz</a>
+    <a href="#basics" data-sec="basics">1 Basics</a><a href="#dsp" data-sec="dsp">2 DSP</a><a href="#ranging" data-sec="ranging">3 Ranging &amp; MF</a><a href="#barker" data-sec="barker">4 Barker</a><a href="#calc">Calculator</a><a href="#quiz">Quiz</a>
   </nav>
   <div class="score" id="scoreTop">score 0 / 0</div>
 </div></header>
@@ -104,145 +151,711 @@ html{scroll-behavior:smooth}
 <div class="hero">
   <div class="eyebrow">Radar Systems &amp; Remote Sensing · weeks 1–4</div>
   <h1>Radar Part 1 Lab</h1>
-  <p>Each topic gives you the formulas from the lectures, then a lab you can play with. Move the sliders and watch how each formula behaves. The quiz at the end generates new numeric problems every time you open it.</p>
+  <p>A study course for the first part of the class. Each chapter explains the idea from the start, derives the formulas step by step, works through numerical examples, and then gives you a lab where you can change the parameters and see the result. Slide references point back to the lecture PDFs (for example "week 3a p.3").</p>
+  <p>Suggested way to use it: read a step, open the worked example and try it yourself before expanding the solution, then play with the lab until the "Try it" tasks make sense. Tick each chapter as done at the bottom of it.</p>
   <div class="legend"><span class="c-tx">transmitted pulse</span><span class="c-echo">received echo</span><span class="c-mf">matched-filter output</span></div>
+  <div class="path">
+    <a href="#basics"><span>Chapter 1 · week 1</span><b>The radar idea</b><span>echo timing, waveforms, block diagram, bands, antennas, radar equation</span></a>
+    <a href="#dsp"><span>Chapter 2 · week 2</span><b>DSP for radar</b><span>I/Q, sampling, PRI/PRF/DC, data cube, DTFT and DFT</span></a>
+    <a href="#ranging"><span>Chapter 3 · week 3</span><b>Ranging &amp; matched filter</b><span>resolution, ambiguity, bins, signal model, MF</span></a>
+    <a href="#barker"><span>Chapter 4 · week 4</span><b>Pulse compression</b><span>energy vs resolution, Barker codes, sidelobes</span></a>
+  </div>
 </div>
 
-<!-- ============ 1 BASICS ============ -->
+<!-- =====================================================================
+     CHAPTER 1
+===================================================================== -->
 <section class="topic" id="basics">
-  <div class="eyebrow">Week 1 · The radar idea</div>
-  <h2>1. What a radar measures and how</h2>
-  <p>A radar transmits an electromagnetic wave and listens for the echo. Range comes from the echo's delay t₀, speed comes from its frequency shift f<sub>D</sub> (weeks 6–7), and angle comes from where the antenna points (week 8).</p>
-  <div class="formulas"><div class="f">R₀ = <b>c·t₀ / 2</b></div><div class="f">c = 3·10⁸ m/s</div><div class="f">monostatic = one antenna for Tx and Rx</div></div>
+  <div class="eyebrow">Chapter 1 · week 1a, 1b</div>
+  <h2>The radar idea</h2>
 
-  <div class="lab">
-    <div class="lab-head"><h3>Monostatic block diagram</h3><span class="tag">click a block</span></div>
-    <div class="chain" id="chainTx"></div>
-    <div class="chain" id="chainRx"></div>
-    <div class="info" id="blkInfo">Click any block to see what it does. The key idea: all signal processing happens at baseband. The Tx chain moves the pulse up to the carrier f<sub>c</sub>, and the Rx chain brings it back down.</div>
+  <div class="step" id="b-what">
+    <h3><span class="n">1.1</span>What a radar does</h3>
+    <p>RADAR stands for <b>RA</b>dio <b>D</b>etection <b>A</b>nd <b>R</b>anging. It is a device that sends out electromagnetic energy and uses what comes back to answer some or all of these questions (week 1a p.4):</p>
+    <ul>
+      <li><b>Detection:</b> is there a target at all, or is this just noise?</li>
+      <li><b>Range:</b> how far away is it?</li>
+      <li><b>Angle:</b> in which direction (azimuth and elevation)?</li>
+      <li><b>Speed:</b> how fast is it moving towards or away from me?</li>
+      <li><b>Tracking and classification:</b> where is it going, and what is it (plane, car, rain, ground)?</li>
+    </ul>
+    <p>Each answer comes from a different property of the echo. This course builds one at a time:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Quantity</th><th>Property of the echo</th><th>Key formula</th><th>Lectures</th></tr></thead>
+      <tbody>
+        <tr><td>Range R</td><td>time delay t₀</td><td class="mono">R = c·t₀/2</td><td>weeks 3–5</td></tr>
+        <tr><td>Radial speed v</td><td>frequency shift f<sub>D</sub> (Doppler)</td><td class="mono">f_D = 2v/λ</td><td>weeks 6–7</td></tr>
+        <tr><td>Angle θ</td><td>antenna pointing / phase across an array</td><td class="mono">beamforming</td><td>week 8</td></tr>
+        <tr><td>Detection</td><td>echo strength vs noise</td><td class="mono">SNR, threshold</td><td>week 9</td></tr>
+      </tbody>
+    </table></div>
+    <p>Applications from the slides: air traffic control and military ground radars, X-band fighter radars (APG-80, APG-83), 77 GHz car radars for driver assistance, weather radar, and satellite synthetic aperture radar (SAR) imaging of Earth and even the surface of Venus (Magellan).</p>
   </div>
 
-  <div class="lab">
-    <div class="lab-head"><h3>Three waveform families</h3><span class="tag">week 1a · slide 5</span></div>
-    <canvas id="cvWave" class="tall" aria-label="CW, pulsed and FMCW waveforms"></canvas>
-    <p class="note">CW transmits all the time: it measures Doppler but can't time an echo. Pulsed sends bursts of width τ every PRI, so range comes from timing. FMCW sweeps its frequency, so range comes from a frequency difference (stretch processing, week 5).</p>
+  <div class="step" id="b-echo">
+    <h3><span class="n">1.2</span>Range from the echo delay</h3>
+    <p>The wave travels at the speed of light \(c = 3\cdot10^8\) m/s. If a target is at distance \(R_0\), the wave goes out \(R_0\) and comes back \(R_0\), so the total path is \(2R_0\). The echo therefore arrives after</p>
+    <div class="eq">\[ t_0 = \frac{2R_0}{c} \quad\Longleftrightarrow\quad R_0 = \frac{c\,t_0}{2} \]</div>
+    <p>The factor 2 is the most common source of mistakes. Always ask: "is this a one-way or a two-way delay?" The radar measures two-way delay.</p>
+    <p>A useful rule of thumb: \(c/2 = 150\) m per µs. So every microsecond of delay is 150 m of range, and 1 km of range is 6.67 µs of delay.</p>
+    <details class="worked"><summary><span>Worked example</span> An echo arrives 40 µs after the pulse. How far is the target?</summary>
+      <div class="body">
+        <p>\(R_0 = \dfrac{c\,t_0}{2} = \dfrac{3\cdot10^8 \times 40\cdot10^{-6}}{2} = \dfrac{12000}{2} = 6000\) m = 6 km.</p>
+        <p>Check with the rule of thumb: 40 µs × 150 m/µs = 6000 m. ✓</p>
+      </div>
+    </details>
+    <details class="worked"><summary><span>Worked example</span> A car radar must see targets up to 250 m. How long must it listen after each pulse?</summary>
+      <div class="body">
+        <p>\(t_0 = 2R/c = 2\times250 / 3\cdot10^8 = 1.67\) µs. The receiver must listen for at least 1.67 µs before the next pulse goes out.</p>
+      </div>
+    </details>
   </div>
+
+  <div class="step" id="b-wave">
+    <h3><span class="n">1.3</span>The three waveform families</h3>
+    <p>How the radar transmits decides what it can measure easily (week 1a p.5, from Richards' <i>Fundamentals of Radar Signal Processing</i>).</p>
+    <div class="lab">
+      <div class="lab-head"><h4>CW, pulsed and FMCW</h4><span class="tag">week 1a p.5</span></div>
+      <canvas id="cvWave" class="tall" aria-label="CW, pulsed and FMCW waveforms"></canvas>
+    </div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Waveform</th><th>How it works</th><th>Good at</th><th>Weak at</th></tr></thead>
+      <tbody>
+        <tr><td><b>CW</b> (continuous wave)</td><td>A sinusoid at f<sub>c</sub> transmitted all the time.</td><td>Speed: the echo comes back at f<sub>c</sub>+f<sub>D</sub>, easy to measure.</td><td>Range: a never-ending sinusoid has no "start" to time. Needs separate Tx and Rx antennas.</td></tr>
+        <tr><td><b>Pulsed</b></td><td>Short bursts of length τ, repeated every PRI = T.</td><td>Range: time the echo of each pulse. One antenna can do Tx and Rx.</td><td>Short pulses carry little energy. Echoes beyond c·PRI/2 are ambiguous.</td></tr>
+        <tr><td><b>FMCW</b> (frequency-modulated CW)</td><td>Continuous, but the frequency ramps (a chirp) over each period T.</td><td>Range and speed with cheap low-power hardware (car radar at 77 GHz).</td><td>Needs stretch processing (week 5). Tx/Rx isolation.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Most of this part of the course uses the <b>pulsed</b> radar, because it is the simplest one to analyse.</p>
+  </div>
+
+  <div class="step" id="b-block">
+    <h3><span class="n">1.4</span>Inside a monostatic radar</h3>
+    <p><b>Monostatic</b> means the same antenna is used for transmitting and receiving, with a duplexer switching between them. (Bistatic radars use separate Tx and Rx sites.) Follow the signal around the loop and click each block for its job.</p>
+    <div class="lab">
+      <div class="lab-head"><h4>Block diagram</h4><span class="tag">week 1a p.6 · week 2 p.2 · click a block</span></div>
+      <div class="chain" id="chainTx"></div>
+      <div class="chain" id="chainRx"></div>
+      <div class="info" id="blkInfo">Click any block to see what it does and what the signal looks like at that point.</div>
+    </div>
+    <p>The signal at each stage, for one rectangular pulse x(t) of width τ (the "example transmission" on week 1b p.6):</p>
+    <ol>
+      <li>Baseband pulse from the waveform generator: \(x(t)\), a rectangle from 0 to τ.</li>
+      <li>After up-conversion: \(x(t)\cos(2\pi f_c t)\). The pulse now "rides" on the carrier, so the antenna can radiate it.</li>
+      <li>Echo at the antenna: a delayed, much weaker copy, \(a\,x(t-t_0)\cos(2\pi f_c (t-t_0))\), plus noise.</li>
+      <li>After I/Q down-conversion and low-pass filtering: the complex baseband echo \(a\,x(t-t_0)\,e^{-j2\pi f_c t_0}\). The carrier is gone but its phase \(-2\pi f_c t_0\) remains.</li>
+      <li>After the ADC: samples \(y[n] = a\,x(n/f_s - t_0)\,e^{-j\phi} + w[n]\). Everything from now on is DSP.</li>
+    </ol>
+    <div class="box key"><div class="lbl">Key idea</div><p>All radar signal processing in this course happens at <b>baseband</b>, on complex samples. The RF hardware only moves the signal up to f<sub>c</sub> and back down.</p></div>
+  </div>
+
+  <div class="step" id="b-bands">
+    <h3><span class="n">1.5</span>Frequencies and radar bands</h3>
+    <p>RF is the part of the electromagnetic spectrum between 3 kHz and 300 GHz (week 1b p.2). Radars use letter bands inside it. Wavelength and frequency are linked by</p>
+    <div class="eq">\[ \lambda = \frac{c}{f_c} \]</div>
+    <p>The wavelength matters a lot: antenna size, how well the wave passes through rain, and the Doppler shift (\(f_D = 2v/\lambda\)) all depend on it.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Band</th><th>Frequency</th><th>λ (approx.)</th><th>Typical use</th></tr></thead>
+      <tbody>
+        <tr><td>L</td><td>1–2 GHz</td><td>15–30 cm</td><td>long-range air surveillance, SAR</td></tr>
+        <tr><td>S</td><td>2–4 GHz</td><td>7.5–15 cm</td><td>air traffic control, weather</td></tr>
+        <tr><td>C</td><td>4–8 GHz</td><td>3.75–7.5 cm</td><td>weather, satellite SAR (Sentinel-1)</td></tr>
+        <tr><td>X</td><td>8–12 GHz</td><td>2.5–3.75 cm</td><td>fighter radars (F-16, F-18), marine, SAR</td></tr>
+        <tr><td>Ku / K / Ka</td><td>12–40 GHz</td><td>0.75–2.5 cm</td><td>high-resolution imaging, altimetry</td></tr>
+        <tr><td>W</td><td>75–110 GHz</td><td>~4 mm</td><td>77 GHz automotive radar</td></tr>
+      </tbody>
+    </table></div>
+    <div class="lab">
+      <div class="lab-head"><h4>Wavelength calculator</h4><span class="tag">λ = c/f</span></div>
+      <div class="controls"><div class="ctl"><label for="lamF">Carrier f<sub>c</sub> <output id="lamFO"></output></label><input type="range" id="lamF" min="0" max="100" step="0.5" value="40"></div></div>
+      <div class="readouts" id="lamRO"></div>
+    </div>
+  </div>
+
+  <div class="step" id="b-ant">
+    <h3><span class="n">1.6</span>Antennas and how to read a radiation pattern</h3>
+    <p>An antenna converts the electrical signal into a radiated wave (and back). The source behind it is modelled as a generator with voltage V<sub>g</sub> and impedance Z<sub>g</sub> (week 1b p.4). Three ideas you need:</p>
+    <ul>
+      <li><b>Isotropic antenna:</b> an idealised antenna that radiates equally in every direction. It doesn't exist, but it is the reference for "gain".</li>
+      <li><b>Omnidirectional (e.g. dipole):</b> equal in all azimuth directions, but not up and down. Simple, cheap (a bent wire), efficient, single frequency (week 1b p.5, p.7).</li>
+      <li><b>Directional:</b> concentrates power in a <b>main beam</b> along the <b>boresight</b> direction (κατεύθυνση σκόπευσης), with smaller <b>sidelobes</b> elsewhere (week 1b p.8–9).</li>
+    </ul>
+    <p>The <b>gain</b> G tells you how much stronger the antenna radiates along boresight than an isotropic antenna with the same power. A larger antenna (compared with λ) gives a narrower beam and a higher gain. For a uniform aperture of width D the pattern is</p>
+    <div class="eq">\[ P(\theta) = \left|\frac{\sin(\pi \tfrac{D}{\lambda}\sin\theta)}{\pi \tfrac{D}{\lambda}\sin\theta}\right|^2,\qquad \theta_{3\text{dB}} \approx 0.886\,\frac{\lambda}{D}\ \text{rad} \]</div>
+    <p><b>How to read the plot on week 1b p.9</b> (normalized power in dB vs angle):</p>
+    <ol>
+      <li>The peak is at 0 dB by definition: that is the boresight direction.</li>
+      <li>Find where the curve drops to −3 dB on both sides. The angle between them is the <b>3 dB beamwidth</b>, where power is half the peak. That's roughly the angular resolution of the radar.</li>
+      <li>The bumps outside the main beam are <b>sidelobes</b>. For a uniform aperture the first sidelobe sits at −13.3 dB. Strong targets in a sidelobe can appear as if they were in the main beam.</li>
+      <li>The pattern is the same whether the antenna transmits or receives (reciprocity). The round-trip pattern is therefore the square, i.e. twice the dB value.</li>
+    </ol>
+    <div class="lab">
+      <div class="lab-head"><h4>Radiation pattern explorer</h4><span class="tag">uniform aperture</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="antD">Aperture size D/λ <output id="antDO"></output></label><input type="range" id="antD" min="1" max="30" step="0.5" value="8"></div>
+        <div class="ctl"><label for="antSteer">Plot</label><select id="antSteer"><option value="db" selected>Normalized power (dB)</option><option value="lin">Normalized power (linear)</option></select></div>
+      </div>
+      <canvas id="cvAnt" aria-label="Antenna radiation pattern"></canvas>
+      <div class="readouts" id="antRO"></div>
+      <div class="try"><b>Try it</b><p>Double D/λ and watch the beamwidth halve. The first sidelobe stays at −13.3 dB whatever the size: sidelobe level is set by the shape of the aperture illumination, not its size. Switch to linear to see why dB plots are used: the sidelobes almost vanish on a linear scale but still matter.</p></div>
+    </div>
+  </div>
+
+  <div class="step" id="b-req">
+    <h3><span class="n">1.7</span>The radar equation: how much power comes back?</h3>
+    <p>Week 1b ends with the question "how much power do we transmit and how much do we get back?". The answer is the radar range equation. Build it in four steps (this is the standard form in Richards, the course textbook):</p>
+    <ol>
+      <li><b>Spread out.</b> An isotropic antenna spreads P<sub>t</sub> over a sphere of area \(4\pi R^2\). Power density at the target: \(\dfrac{P_t}{4\pi R^2}\) W/m².</li>
+      <li><b>Focus.</b> A directional antenna with gain G multiplies this along boresight: \(\dfrac{P_t G}{4\pi R^2}\).</li>
+      <li><b>Reflect.</b> The target intercepts and re-radiates power as if it had area σ, its <b>radar cross section (RCS)</b> in m². That power spreads out again over a sphere: density back at the radar is \(\dfrac{P_t G}{4\pi R^2}\cdot\dfrac{\sigma}{4\pi R^2}\).</li>
+      <li><b>Collect.</b> The receiving antenna has effective area \(A_e = \dfrac{G\lambda^2}{4\pi}\). Multiply to get the received power:</li>
+    </ol>
+    <div class="eq">\[ P_r = \frac{P_t\,G^2\,\lambda^2\,\sigma}{(4\pi)^3\,R^4} \]</div>
+    <p>The most important feature is \(R^4\): double the range and the echo gets 16 times (12 dB) weaker. This is why radar echoes are tiny and why the receiver needs a low-noise amplifier and clever processing such as the matched filter and pulse compression.</p>
+    <p>To judge detectability, compare P<sub>r</sub> with the receiver's thermal noise power \(P_n = k T_0 B F\), where k = 1.38·10⁻²³ J/K, T₀ = 290 K, B is the bandwidth and F is the noise figure. The ratio is the single-pulse SNR. In the signal model of chapter 3, P<sub>r</sub> becomes the amplitude \(\sqrt{P_r}\) of the echo.</p>
+    <div class="lab">
+      <div class="lab-head"><h4>Radar equation calculator</h4><span class="tag">P_r ∝ 1/R⁴</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="reqPt">Transmit power P<sub>t</sub> <output id="reqPtO"></output></label><input type="range" id="reqPt" min="0" max="60" step="1" value="40"></div>
+        <div class="ctl"><label for="reqG">Antenna gain G <output id="reqGO"></output></label><input type="range" id="reqG" min="0" max="45" step="1" value="30"></div>
+        <div class="ctl"><label for="reqF">Carrier f<sub>c</sub> <output id="reqFO"></output></label><input type="range" id="reqF" min="1" max="80" step="1" value="10"></div>
+        <div class="ctl"><label for="reqS">Target RCS σ <output id="reqSO"></output></label><input type="range" id="reqS" min="-20" max="30" step="1" value="0"></div>
+        <div class="ctl"><label for="reqR">Range R <output id="reqRO"></output></label><input type="range" id="reqR" min="0.5" max="200" step="0.5" value="20"></div>
+        <div class="ctl"><label for="reqB">Bandwidth B <output id="reqBO"></output></label><input type="range" id="reqB" min="0" max="3" step="0.1" value="0"></div>
+      </div>
+      <canvas id="cvReq" aria-label="Received power versus range"></canvas>
+      <div class="readouts" id="reqRO2"></div>
+      <div class="try"><b>Try it</b><p>Read off the SNR at 20 km, then double the range: SNR falls by exactly 12 dB. Increase the bandwidth tenfold: noise rises by 10 dB. That is the price of fine range resolution with a short pulse, and the reason chapter 4 exists.</p></div>
+    </div>
+    <p class="note">σ is typically 0.01 m² for a small drone, 1 m² for a small aircraft, 10–100 m² for an airliner and 100+ m² for a ship. RCS models come later in the course (week 10).</p>
+  </div>
+
+  <div class="box mistake"><div class="lbl">Common mistakes in chapter 1</div><ul>
+    <li>Using \(R = c\,t_0\) instead of \(c\,t_0/2\). The echo delay is two-way.</li>
+    <li>Thinking P<sub>r</sub> falls with \(1/R^2\). That is one-way propagation (e.g. a communication link). Radar is \(1/R^4\).</li>
+    <li>Mixing dB and linear values in the radar equation. Convert everything to linear first, or everything to dB and add/subtract.</li>
+  </ul></div>
+  <label class="done-row"><input type="checkbox" class="done" data-sec="basics"> I've finished chapter 1</label>
 </section>
 
-<!-- ============ 2 DSP ============ -->
+<!-- =====================================================================
+     CHAPTER 2
+===================================================================== -->
 <section class="topic" id="dsp">
-  <div class="eyebrow">Week 2 · DSP for radar</div>
-  <h2>2. I/Q, the data cube and the DFT</h2>
-  <p>The receiver mixes with cos and −sin of the carrier and low-pass filters, which gives a complex baseband signal y = y<sub>I</sub> + j·y<sub>Q</sub>. Keeping it complex keeps the phase, and Doppler lives in the phase.</p>
-  <div class="formulas">
-    <div class="f">PRF = 1 / PRI</div><div class="f">DC = τ / PRI</div><div class="f">samples per PRI = PRI·f<sub>s</sub></div>
-    <div class="f">fast time l → <b>range bin</b></div><div class="f">slow time m → <b>pulse number</b></div>
+  <div class="eyebrow">Chapter 2 · week 2, 5b</div>
+  <h2>DSP for radar</h2>
+
+  <div class="step" id="d-iq">
+    <h3><span class="n">2.1</span>From RF to complex baseband: the I/Q receiver</h3>
+    <p>The echo arriving at the antenna is a real passband signal. Write it as an amplitude and a phase riding on the carrier:</p>
+    <div class="eq">\[ r(t) = A(t)\cos\big(2\pi f_c t + \phi(t)\big) \]</div>
+    <p>The I/Q receiver (week 2 p.3) splits it into two branches.</p>
+    <p><b>I branch.</b> Multiply by \(2\cos(2\pi f_c t)\) and use \(2\cos a\cos b = \cos(a-b) + \cos(a+b)\):</p>
+    <div class="eq">\[ 2\cos(2\pi f_c t)\,r(t) = A\cos\phi + \underbrace{A\cos(4\pi f_c t + \phi)}_{\text{removed by the LPF}} \;\Rightarrow\; y_I = A\cos\phi \]</div>
+    <p><b>Q branch.</b> Multiply by \(-2\sin(2\pi f_c t)\) and low-pass filter in the same way: \(y_Q = A\sin\phi\).</p>
+    <p>Put them together as one complex number:</p>
+    <div class="eq">\[ y = y_I + j\,y_Q = A\cos\phi + jA\sin\phi = A\,e^{j\phi} \]</div>
+    <p>So a single complex sample stores both the <b>amplitude</b> A and the <b>phase</b> φ of the echo. Why does this matter?</p>
+    <ul>
+      <li>Range information lives in the delay (amplitude envelope). Doppler information lives in how the phase changes from pulse to pulse.</li>
+      <li>With only the I channel you see \(A\cos\phi\), and \(\cos\phi = \cos(-\phi)\). You can't tell a target approaching from one moving away.</li>
+      <li>The noise in each branch is Gaussian, so the noise sample is complex Gaussian. That's why your code adds <code>randn + 1j·randn</code>.</li>
+    </ul>
+    <div class="lab">
+      <div class="lab-head"><h4>I/Q phasor</h4><span class="tag">y = A·e^{jφ}</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="iqA">Amplitude A <output id="iqAO"></output></label><input type="range" id="iqA" min="0.1" max="1" step="0.05" value="0.8"></div>
+        <div class="ctl"><label for="iqP">Phase φ <output id="iqPO"></output></label><input type="range" id="iqP" min="-180" max="180" step="5" value="40"></div>
+        <div class="ctl"><label for="iqRot">Doppler rotation per pulse <output id="iqRotO"></output></label><input type="range" id="iqRot" min="-60" max="60" step="5" value="25"></div>
+      </div>
+      <div class="two">
+        <div><canvas id="cvIq" class="square" aria-label="Phasor in the complex plane"></canvas><p class="note">Complex plane: dots are the samples of 8 successive pulses from one range bin.</p></div>
+        <div><canvas id="cvIq2" class="square" aria-label="I and Q over pulses"></canvas><p class="note">I (solid) and Q (dashed) across the same 8 pulses.</p></div>
+      </div>
+      <div class="readouts" id="iqRO"></div>
+      <div class="try"><b>Try it</b><p>Set the rotation to +25° and then −25°. The I curve is identical in both cases. Only Q tells you the direction of rotation, which is the sign of the Doppler shift (target approaching or receding). This is the preview of weeks 6–7.</p></div>
+    </div>
+    <div class="box slide"><div class="lbl">Slide note · week 2 p.3</div><p>The QAM model in the slide is the same receiver used in digital communications: \(s_I(t)\) and \(s_Q(t)\) modulate cos and −sin, the channel adds noise n(t), and the receiver recovers \(y_I = s_I + n_I\) and \(y_Q = s_Q + n_Q\). The lecturer asks you to review digital communication systems for exactly this reason.</p></div>
   </div>
 
-  <div class="lab">
-    <div class="lab-head"><h3>Data cube y[l, m]</h3><span class="tag">week 2 · week 7c example preloaded</span></div>
-    <div class="controls">
-      <div class="ctl"><label for="dcFs">f<sub>s</sub> <output id="dcFsO"></output></label><input type="range" id="dcFs" min="50" max="1000" step="10" value="200"></div>
-      <div class="ctl"><label for="dcPri">PRI <output id="dcPriO"></output></label><input type="range" id="dcPri" min="0.1" max="2" step="0.05" value="1"></div>
-      <div class="ctl"><label for="dcDc">Duty cycle <output id="dcDcO"></output></label><input type="range" id="dcDc" min="0.005" max="0.3" step="0.005" value="0.1"></div>
-      <div class="ctl"><label for="dcR">Target range R₀ <output id="dcRO"></output></label><input type="range" id="dcR" min="0.2" max="30" step="0.1" value="3.7"></div>
-      <div class="ctl"><label for="dcM">Pulses M <output id="dcMO"></output></label><input type="range" id="dcM" min="4" max="32" step="1" value="20"></div>
-      <div class="ctl"><label for="dcSnr">SNR per sample <output id="dcSnrO"></output></label><input type="range" id="dcSnr" min="-10" max="30" step="1" value="15"></div>
-      <div class="ctl"><label for="dcMf">Display</label><select id="dcMf"><option value="raw">Raw |y[l,m]| (before MF)</option><option value="mf" selected>After matched filter</option></select></div>
-    </div>
-    <canvas id="cvCube" class="tall" aria-label="Data cube heatmap"></canvas>
-    <div class="readouts" id="cubeRO"></div>
-    <div class="try">Try it: switch between <b>Raw</b> and <b>After matched filter</b>. Raw shows L lit rows (the whole pulse). After MF the energy collapses into one row: the target's range bin. That is the bright row in your week 7c slide.</div>
+  <div class="step" id="d-samp">
+    <h3><span class="n">2.2</span>Sampling the baseband signal</h3>
+    <p>After the LPF the signal occupies roughly −B/2 to +B/2 around zero, where B is the pulse bandwidth. The ADC samples at rate f<sub>s</sub>, every \(T_s = 1/f_s\) seconds. Because I and Q are sampled together, a complex signal needs \(f_s \ge B\) to avoid aliasing (a real signal would need 2× its highest frequency).</p>
+    <p>Sampling has a direct meaning in a radar: each sample interval is a slice of range,</p>
+    <div class="eq">\[ \Delta R_{\text{bin}} = \frac{c\,T_s}{2} = \frac{c}{2f_s} \]</div>
+    <p>So "sample number n" and "range bin n" are the same thing. Chapter 3.4 looks at what that means for accuracy.</p>
   </div>
 
-  <div class="lab">
-    <div class="lab-head"><h3>DTFT vs DFT, zero-padding and leakage</h3><span class="tag">week 2 · week 5b</span></div>
-    <div class="controls">
-      <div class="ctl"><label for="dfF0">Tone f₀ <output id="dfF0O"></output></label><input type="range" id="dfF0" min="0" max="31.75" step="0.25" value="16.5"></div>
-      <div class="ctl"><label for="dfN">Samples N (signal length) <output id="dfNO"></output></label><input type="range" id="dfN" min="8" max="128" step="8" value="64"></div>
-      <div class="ctl"><label for="dfK">FFT size K (NFFT)</label><select id="dfK"><option>16</option><option>32</option><option selected>64</option><option>128</option><option>256</option><option>512</option></select></div>
-    </div>
-    <canvas id="cvDft" aria-label="DTFT and DFT plot"></canvas>
-    <div class="readouts" id="dftRO"></div>
-    <div class="try">Try it: with f₀ = 16 Hz and K = 64 you get one clean spike. Change f₀ to 16.5 Hz and the energy leaks into neighbouring bins. Now set K = 128: the bins land on 16.5 Hz and the leakage disappears. Raising K never makes the curve's main lobe narrower. Only a larger N does that.</div>
+  <div class="step" id="d-term">
+    <h3><span class="n">2.3</span>Pulse train terminology</h3>
+    <p>A pulsed radar sends M pulses, one every PRI. Learn these definitions precisely (week 2 p.4):</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Term</th><th>Meaning</th><th>Formula / unit</th></tr></thead>
+      <tbody>
+        <tr><td><b>τ</b></td><td>pulse width: how long each pulse lasts</td><td class="mono">s (often µs)</td></tr>
+        <tr><td><b>PRI</b> (T)</td><td>pulse repetition interval: time from one pulse start to the next</td><td class="mono">s</td></tr>
+        <tr><td><b>PRF</b></td><td>pulse repetition frequency: pulses per second</td><td class="mono">PRF = 1/PRI  (Hz)</td></tr>
+        <tr><td><b>DC</b></td><td>duty cycle: fraction of the PRI with non-zero pulse</td><td class="mono">DC = τ/PRI</td></tr>
+        <tr><td><b>CPI</b></td><td>coherent processing interval: the block of M pulses processed together</td><td class="mono">CPI = M·PRI</td></tr>
+        <tr><td><b>RCS</b> (σ)</td><td>radar cross section: the target's effective reflecting area</td><td class="mono">m²</td></tr>
+      </tbody>
+    </table></div>
+    <p>In the slide's sketch, DC = 0.1 means the pulse is "on" for 10% of each PRI, and M = 4 pulses are drawn. The average transmitted power is \(P_{avg} = DC \times P_{peak}\).</p>
+    <details class="worked"><summary><span>Worked example</span> PRF = 2 kHz and DC = 5%. Find PRI, τ, and the CPI for M = 64 pulses.</summary>
+      <div class="body">
+        <p>PRI = 1/PRF = 1/2000 = 0.5 ms.</p>
+        <p>τ = DC × PRI = 0.05 × 0.5 ms = 25 µs.</p>
+        <p>CPI = M × PRI = 64 × 0.5 ms = 32 ms.</p>
+      </div>
+    </details>
   </div>
+
+  <div class="step" id="d-cube">
+    <h3><span class="n">2.4</span>The data cube</h3>
+    <p>The ADC produces one long stream of samples. Cut that stream every PRI and stack the pieces side by side as columns of a matrix (week 2 p.5, week 7c p.2):</p>
+    <div class="eq">\[ y[l, m],\qquad l = 0,\dots,N-1 \ (\text{fast time}),\qquad m = 0,\dots,M-1 \ (\text{slow time}) \]</div>
+    <ul>
+      <li><b>Fast time l</b> indexes samples within one PRI. They are spaced by 1/f<sub>s</sub>, typically microseconds, so l is a <b>range bin</b>. There are \(N = \text{PRI}\cdot f_s\) of them.</li>
+      <li><b>Slow time m</b> indexes pulses. They are spaced by one PRI, typically a millisecond, hence "slow".</li>
+      <li>A target at a fixed range appears in the <b>same row</b> l = k₀ in every column.</li>
+      <li>Adding an antenna array later adds a third axis (channel), which makes it a real cube (week 8).</li>
+    </ul>
+    <p>The two axes are processed in different ways:</p>
+    <ul>
+      <li><b>Down a column (fast time):</b> matched filtering and pulse compression. This finds the range. Chapters 3 and 4.</li>
+      <li><b>Along a row (slow time):</b> an FFT across pulses. This finds the Doppler/speed. Weeks 6–7.</li>
+    </ul>
+    <div class="lab">
+      <div class="lab-head"><h4>Data cube y[l, m]</h4><span class="tag">week 7c example preloaded</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="dcFs">f<sub>s</sub> <output id="dcFsO"></output></label><input type="range" id="dcFs" min="50" max="1000" step="10" value="200"></div>
+        <div class="ctl"><label for="dcPri">PRI <output id="dcPriO"></output></label><input type="range" id="dcPri" min="0.1" max="2" step="0.05" value="1"></div>
+        <div class="ctl"><label for="dcDc">Duty cycle <output id="dcDcO"></output></label><input type="range" id="dcDc" min="0.005" max="0.3" step="0.005" value="0.1"></div>
+        <div class="ctl"><label for="dcR">Target range R₀ <output id="dcRO"></output></label><input type="range" id="dcR" min="0.2" max="30" step="0.1" value="3.7"></div>
+        <div class="ctl"><label for="dcM">Pulses M <output id="dcMO"></output></label><input type="range" id="dcM" min="4" max="32" step="1" value="20"></div>
+        <div class="ctl"><label for="dcSnr">SNR per sample <output id="dcSnrO"></output></label><input type="range" id="dcSnr" min="-10" max="30" step="1" value="15"></div>
+        <div class="ctl"><label for="dcMf">Display</label><select id="dcMf"><option value="raw">Raw |y[l,m]| (before MF)</option><option value="mf" selected>After matched filter</option></select></div>
+      </div>
+      <canvas id="cvCube" class="tall" aria-label="Data cube heatmap"></canvas>
+      <div class="readouts" id="cubeRO"></div>
+      <div class="try"><b>Try it</b>
+        <p>1. Switch between <i>Raw</i> and <i>After matched filter</i>. Raw shows L lit rows (the whole pulse, L = τ·f<sub>s</sub> samples). After the MF the energy collapses into one row: the target's range bin. That is the bright row on the week 7c slide.</p>
+        <p>2. Lower the SNR to −5 dB. In the raw view the target nearly disappears. After the MF it is still clear. That is the matched filter's processing gain (chapter 3.6).</p>
+        <p>3. Push R₀ beyond c·PRI/2 (150 km at PRI = 1 ms needs a smaller PRI to see it: try PRI = 0.1 ms and R₀ = 20 km). The status turns red: the echo wraps into the next PRI.</p>
+      </div>
+    </div>
+    <div class="codehead"><span>Building the cube in code (Python)</span></div>
+<pre class="code"><code>N = int(PRI*fs)                 # fast-time samples per PRI
+rx = ...                        # received stream of M*N complex samples
+Y = rx.reshape(M, N).T          # Y[l, m]: rows = range bins, columns = pulses
+# MATLAB: Y = reshape(rx, N, M);   (MATLAB fills column by column)</code></pre>
+  </div>
+
+  <div class="step" id="d-ft">
+    <h3><span class="n">2.5</span>Fourier transforms: FT, DTFT and DFT</h3>
+    <p>Three versions of the same idea, for three kinds of signal (week 2 p.6–10, week 5b p.2–7):</p>
+    <h4>Fourier Transform (continuous time)</h4>
+    <div class="eq">\[ G(f) = \int_{-\infty}^{\infty} g(t)\,e^{-j2\pi f t}\,dt, \qquad g(t) = \int_{-\infty}^{\infty} G(f)\,e^{j2\pi f t}\,df \]</div>
+    <h4>DTFT (discrete time, continuous frequency)</h4>
+    <p>For a sequence x[n] that is absolutely summable (\(\sum|x[n]| \lt \infty\)):</p>
+    <div class="eq">\[ X(f) = \sum_{n=-\infty}^{\infty} x[n]\,e^{-j2\pi \frac{f}{f_s} n} \]</div>
+    <p><b>Why is the DTFT periodic with period f<sub>s</sub>?</b> (the "Q: Why?" on the slide). Replace f with f + f<sub>s</sub>:</p>
+    <div class="eq">\[ e^{-j2\pi \frac{f+f_s}{f_s} n} = e^{-j2\pi \frac{f}{f_s} n}\cdot \underbrace{e^{-j2\pi n}}_{=1\ \text{for integer } n} \]</div>
+    <p>Because n is an integer, the extra factor is always 1. Sampled signals cannot tell f from f + f<sub>s</sub>: this is aliasing. So we only plot one period, −f<sub>s</sub>/2 to f<sub>s</sub>/2 (or −0.5 to 0.5 in normalized frequency f/f<sub>s</sub>, as on the slides).</p>
+    <h4>DFT (discrete time, discrete frequency)</h4>
+    <p>A computer can't evaluate X(f) at infinitely many f. The DFT takes K equally spaced samples of the DTFT of a finite signal:</p>
+    <div class="eq">\[ X[k] = \sum_{n=0}^{K-1} x[n]\,e^{-j\frac{2\pi n k}{K}} = X(f)\Big|_{f = k\,f_s/K},\qquad k = 0,\dots,K-1 \]</div>
+    <div class="eq">\[ x[n] = \frac{1}{K}\sum_{k=0}^{K-1} X[k]\,e^{j\frac{2\pi n k}{K}} \]</div>
+    <p>(The slide writes the IDFT without the 1/K; MATLAB's <code>ifft</code> and NumPy include it.) The FFT is just a fast algorithm for the DFT.</p>
+    <h4>The DTFT of a tone: where the peak shape comes from</h4>
+    <p>Take N samples of a complex tone \(x[n] = e^{j2\pi f_0 n/f_s}\). Its DTFT is a geometric series that sums to</p>
+    <div class="eq">\[ |X(f)| = \left|\frac{\sin\!\big(\pi N (f-f_0)/f_s\big)}{\sin\!\big(\pi (f-f_0)/f_s\big)}\right| \]</div>
+    <p>This "asinc" (aliased sinc, or Dirichlet kernel) has a peak of height N at f₀ and nulls every f<sub>s</sub>/N. Three consequences:</p>
+    <ul>
+      <li><b>Resolution</b> ≈ f<sub>s</sub>/N = 1/(N·T<sub>s</sub>) = 1/(observation time). Two tones closer than this merge into one peak. Only <i>observing longer</i> (bigger N) improves it.</li>
+      <li><b>Zero-padding</b> (K &gt; N, i.e. <code>fft(x, K)</code>) samples the same asinc more densely. The picture gets smoother; the resolution does not change. Compare NFFT = 32, 64 and 256 on week 2 p.8.</li>
+      <li><b>Spectral leakage:</b> if f₀ is not a multiple of f<sub>s</sub>/K, no DFT bin sits on the peak. The bins catch the sidelobes instead and energy appears to "leak" across the spectrum (week 5b p.5: f₀ = 16 Hz vs 16.5 Hz).</li>
+    </ul>
+    <div class="lab">
+      <div class="lab-head"><h4>DTFT vs DFT explorer</h4><span class="tag">week 2 p.7–9 · week 5b p.5–6 · f<sub>s</sub> = 64 Hz</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="dfF0">Tone 1 f₀ <output id="dfF0O"></output></label><input type="range" id="dfF0" min="0" max="31.75" step="0.25" value="16.5"></div>
+        <div class="ctl"><label for="dfN">Samples N (signal length) <output id="dfNO"></output></label><input type="range" id="dfN" min="8" max="128" step="8" value="64"></div>
+        <div class="ctl"><label for="dfK">FFT size K (NFFT)</label><select id="dfK"><option>16</option><option>32</option><option selected>64</option><option>128</option><option>256</option><option>512</option></select></div>
+        <div class="ctl"><label for="dfTwo">Second tone</label><select id="dfTwo"><option value="0" selected>Off</option><option value="1">On</option></select></div>
+        <div class="ctl"><label for="dfF1">Tone 2 f₁ <output id="dfF1O"></output></label><input type="range" id="dfF1" min="0" max="31.75" step="0.25" value="18"></div>
+      </div>
+      <canvas id="cvDft" aria-label="DTFT and DFT plot"></canvas>
+      <div class="readouts" id="dftRO"></div>
+      <div class="try"><b>Try it</b>
+        <p>1. <b>Leakage.</b> f₀ = 16 Hz, K = 64: one clean spike. Move to 16.5 Hz: energy leaks into all bins. Now K = 128: the bins land on 16.5 Hz and leakage seems to disappear (week 5b p.6 shows exactly this).</p>
+        <p>2. <b>Zero-padding.</b> Keep N = 32 and raise K from 32 to 512. The grey curve (the true DTFT) never changes. Only the number of orange samples on it does.</p>
+        <p>3. <b>Resolution.</b> Turn on the second tone at f₁ = 17 Hz with f₀ = 16 Hz and N = 32 (resolution 2 Hz). One blob. Raise N to 128 (resolution 0.5 Hz): two peaks. Zero-padding can't do this.</p>
+      </div>
+    </div>
+    <div class="box key"><div class="lbl">Why this matters for radar</div><p>Range (week 5: FMCW beat frequency) and speed (weeks 6–7: Doppler across pulses) are both measured with a DFT. The rules above become radar rules: Doppler resolution = PRF/M, i.e. observe more pulses to separate speeds, and targets between bins leak.</p></div>
+  </div>
+
+  <div class="box mistake"><div class="lbl">Common mistakes in chapter 2</div><ul>
+    <li>Confusing fast time (range, spacing 1/f<sub>s</sub>) with slow time (pulses, spacing PRI).</li>
+    <li>Believing zero-padding improves resolution. It only interpolates.</li>
+    <li>Forgetting <code>fftshift</code>: the raw FFT output runs from 0 to f<sub>s</sub>, so negative frequencies appear on the right.</li>
+    <li>Adding real noise to a complex signal. Use complex noise with variance split between I and Q.</li>
+  </ul></div>
+  <label class="done-row"><input type="checkbox" class="done" data-sec="dsp"> I've finished chapter 2</label>
 </section>
 
-<!-- ============ 3 RANGING ============ -->
+<!-- =====================================================================
+     CHAPTER 3
+===================================================================== -->
 <section class="topic" id="ranging">
-  <div class="eyebrow">Week 3 · Ranging with a rectangular pulse</div>
-  <h2>3. Range, resolution, ambiguity and the matched filter</h2>
-  <div class="formulas">
-    <div class="f">R₀ = c·t₀/2</div><div class="f">B ≈ 1/τ</div><div class="f">ΔR = <b>cτ/2 = c/(2B)</b></div>
-    <div class="f">R<sub>ua</sub> = <b>(c/2)(PRI − τ)</b></div><div class="f">ΔR<sub>bin</sub> = <b>c/(2f<sub>s</sub>)</b></div><div class="f">k₀ = round(2R₀·f<sub>s</sub>/c)</div>
+  <div class="eyebrow">Chapter 3 · week 3a, 3b, 3c, 4 p.2–3</div>
+  <h2>Ranging with a rectangular pulse, and the matched filter</h2>
+  <p>The simplest pulsed waveform is a rectangle of amplitude A and width τ, transmitted every PRI. This chapter answers the four questions on week 3a p.3: how do I get range, how close can two targets be, what happens with many pulses, and what happens with discrete samples. Then it shows how the matched filter finds the echo in noise.</p>
+
+  <div class="step" id="r-range">
+    <h3><span class="n">3.1</span>Measuring range with one pulse</h3>
+    <p>Transmit the pulse at t = 0. A target at R₀ returns a delayed copy that starts at \(t_0 = 2R_0/c\) and ends at \(t_0+\tau\). Find t₀, and you have \(R_0 = c t_0/2\).</p>
+    <p>A second target at R₀ + ΔR returns its echo starting \(2\Delta R/c\) later (the "echo from 2nd target" on the slide). If that is shorter than τ, the two echoes overlap.</p>
   </div>
 
-  <div class="lab">
-    <div class="lab-head"><h3>Echo timing and maximum unambiguous range</h3><span class="tag">week 3a worksheet</span></div>
-    <div class="controls">
-      <div class="ctl"><label for="etR">Target range <output id="etRO"></output></label><input type="range" id="etR" min="1" max="400" step="1" value="60"></div>
-      <div class="ctl"><label for="etTau">Pulse width τ <output id="etTauO"></output></label><input type="range" id="etTau" min="1" max="200" step="1" value="50"></div>
-      <div class="ctl"><label for="etPri">PRI <output id="etPriO"></output></label><input type="range" id="etPri" min="0.2" max="2" step="0.05" value="1"></div>
+  <div class="step" id="r-res">
+    <h3><span class="n">3.2</span>Range resolution and bandwidth</h3>
+    <p><b>Range resolution ΔR</b> is the minimum separation at which two equal targets still appear as two. Derive it two ways:</p>
+    <p><b>(a) Time overlap.</b> Two echoes of length τ can be separated if they don't overlap: \(2\Delta R/c \ge \tau\), so</p>
+    <div class="eq">\[ \Delta R = \frac{c\,\tau}{2} \]</div>
+    <p><b>(b) Bandwidth.</b> The spectrum of a rectangle is a sinc (week 3a p.4 worksheet):</p>
+    <div class="eq">\[ x(t) = A\,\text{rect}\!\left(\tfrac{t}{\tau}\right) \;\xrightarrow{\ \mathcal{F}\ }\; X(f) = A\tau\,\frac{\sin(\pi f\tau)}{\pi f\tau} \]</div>
+    <p>The first nulls are at \(f = \pm 1/\tau\). The bandwidth is roughly \(B \approx 1/\tau\) (the worksheet writes "Bandwidth ≈ 2/τ" for the null-to-null width; use B ≈ 1/τ in the resolution formula). Substitute τ = 1/B:</p>
+    <div class="eq">\[ \Delta R = \frac{c}{2B} \]</div>
+    <p>This second form is the general one: it holds for any waveform, including the coded and chirped pulses of chapter 4 and week 5. <b>Resolution is set by bandwidth</b>, not by pulse length in general.</p>
+    <p>The slide's arrows: ↓τ ⇒ ↑B ⇒ ↓ΔR (better resolution, καλύτερο).</p>
+    <details class="worked"><summary><span>Worked example</span> You need to separate two cars 1.5 m apart. What bandwidth and plain-pulse width do you need?</summary>
+      <div class="body">
+        <p>B = c/(2ΔR) = 3·10⁸ / (2 × 1.5) = 100 MHz.</p>
+        <p>τ = 1/B = 10 ns. A 10 ns pulse carries very little energy. Real 77 GHz car radars get the bandwidth with an FMCW chirp instead (week 5).</p>
+      </div>
+    </details>
+    <div class="lab">
+      <div class="lab-head"><h4>Pulse width, bandwidth and resolution</h4><span class="tag">week 3a p.3–4</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="rsTau">Pulse width τ <output id="rsTauO"></output></label><input type="range" id="rsTau" min="0.2" max="10" step="0.1" value="1"></div>
+        <div class="ctl"><label for="rsSep">Spacing between two targets <output id="rsSepO"></output></label><input type="range" id="rsSep" min="10" max="1500" step="10" value="200"></div>
+      </div>
+      <div class="two">
+        <div><canvas id="cvSpec" class="short" aria-label="Pulse spectrum"></canvas><p class="note">|X(f)| of the rectangular pulse. The first nulls sit at ±1/τ.</p></div>
+        <div><canvas id="cvRes" class="short" aria-label="Two-target matched filter outputs"></canvas><p class="note">Matched-filter output for two equal targets (dashed) and their sum (solid). Each is a triangle of half-width cτ/2 in range.</p></div>
+      </div>
+      <div class="readouts" id="resRO"></div>
+      <div class="try"><b>Try it</b><p>Set the spacing exactly equal to ΔR: the two triangles add up to a flat plateau, the boundary case. A little closer and they merge into one bump. Now shrink τ: the spectrum widens and the triangles narrow together. That's ↓τ ⇒ ↑B ⇒ ↓ΔR in one picture.</p></div>
     </div>
-    <canvas id="cvEcho" aria-label="Transmit pulses and echoes over three PRIs"></canvas>
-    <div class="readouts" id="echoRO"></div>
-    <div class="try">Try it: push the target beyond R<sub>ua</sub>. The echo from pulse 1 arrives after pulse 2 has gone out, so the radar thinks the target is close. That's range ambiguity. If the echo lands on top of a transmitted pulse, the radar is deaf to it because a monostatic antenna can't listen while transmitting.</div>
   </div>
 
-  <div class="lab">
-    <div class="lab-head"><h3>Pulse width, bandwidth and range resolution</h3><span class="tag">week 3a worksheet</span></div>
-    <div class="controls">
-      <div class="ctl"><label for="rsTau">Pulse width τ <output id="rsTauO"></output></label><input type="range" id="rsTau" min="0.2" max="10" step="0.1" value="1"></div>
-      <div class="ctl"><label for="rsSep">Spacing between two targets <output id="rsSepO"></output></label><input type="range" id="rsSep" min="10" max="1500" step="10" value="200"></div>
+  <div class="step" id="r-rua">
+    <h3><span class="n">3.3</span>Many pulses: maximum unambiguous range</h3>
+    <p>A real radar transmits a pulse every PRI (week 3a p.5). In a monostatic radar the antenna can only listen between pulses: the "Rx mode" window lasts \(T - \tau\). An echo from pulse 1 that arrives after pulse 2 has gone out is timed from pulse 2, so the radar thinks the target is much closer. To avoid this, every echo must return before the next pulse:</p>
+    <div class="eq">\[ t_0 \le T - \tau \quad\Rightarrow\quad R_{ua} = \frac{c}{2}(T-\tau) \approx \frac{c\,T}{2} = \frac{c}{2\,\text{PRF}} \]</div>
+    <p>The asterisk on the slide's "Maximum Unambiguous Range*" is that approximation: usually τ ≪ T. Note also that echoes arriving during a transmission (t₀ &lt; τ) are lost. This gives a <b>minimum range</b> of \(c\tau/2\).</p>
+    <p>If a target is beyond R<sub>ua</sub>, the radar sees it at the <b>apparent range</b></p>
+    <div class="eq">\[ R_{app} = \frac{c}{2}\,\big(t_0 \bmod T\big) \]</div>
+    <div class="box key"><div class="lbl">The PRF trade-off</div><p>Low PRF gives long unambiguous range. High PRF gives a wide unambiguous Doppler range (±PRF/2, weeks 6–7) and more pulses per second. You can't have both with one PRF. That's why radars are classed as low-, medium- and high-PRF.</p></div>
+    <details class="worked"><summary><span>Worked example</span> PRI = 1 ms, τ = 50 µs, target at 180 km. What does the radar see?</summary>
+      <div class="body">
+        <p>R<sub>ua</sub> = (3·10⁸/2)(1 ms − 50 µs) = 1.5·10⁸ × 0.95·10⁻³ = 142.5 km. The target is beyond it.</p>
+        <p>t₀ = 2 × 180·10³ / 3·10⁸ = 1.2 ms. Apparent delay = 1.2 mod 1 = 0.2 ms.</p>
+        <p>Apparent range = 1.5·10⁸ × 0.2·10⁻³ = 30 km. The radar reports a target at 30 km. Set these values in the lab below to see it.</p>
+      </div>
+    </details>
+    <div class="lab">
+      <div class="lab-head"><h4>Echo timing over three PRIs</h4><span class="tag">week 3a p.5 worksheet</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="etR">Target range <output id="etRO"></output></label><input type="range" id="etR" min="1" max="400" step="1" value="60"></div>
+        <div class="ctl"><label for="etTau">Pulse width τ <output id="etTauO"></output></label><input type="range" id="etTau" min="1" max="200" step="1" value="50"></div>
+        <div class="ctl"><label for="etPri">PRI <output id="etPriO"></output></label><input type="range" id="etPri" min="0.2" max="2" step="0.05" value="1"></div>
+      </div>
+      <canvas id="cvEcho" aria-label="Transmit pulses and echoes over three PRIs"></canvas>
+      <div class="readouts" id="echoRO"></div>
+      <div class="try"><b>Try it</b><p>Push the target past R<sub>ua</sub> and watch the echo from pulse 1 land in the second PRI. Find a range where the echo sits right on top of a transmitted pulse: the status shows "eclipsed", because a monostatic radar is deaf while transmitting. Then raise the PRI until the target is unambiguous again.</p></div>
     </div>
-    <div class="two">
-      <div><canvas id="cvSpec" class="short" aria-label="Pulse spectrum"></canvas><p class="note">|X(f)| of the rectangular pulse. The first nulls sit at ±1/τ, so B ≈ 1/τ.</p></div>
-      <div><canvas id="cvRes" class="short" aria-label="Two-target matched filter outputs"></canvas><p class="note">Matched-filter output for two equal targets. Each is a triangle reaching ±cτ/2 in range.</p></div>
-    </div>
-    <div class="readouts" id="resRO"></div>
-    <div class="try">Try it: set the spacing exactly to ΔR. The two triangles sum to a flat plateau with no dip. Any closer and they merge into one bump. Shrink τ and both the spectrum widens and the triangles narrow: that's <b>shorter τ → larger B → smaller ΔR</b>.</div>
   </div>
 
-  <div class="lab">
-    <div class="lab-head"><h3>Matched filter on a noisy echo</h3><span class="tag">week 3b · week 4 implementation</span></div>
-    <p>The signal model your code implements: y[n] = √P<sub>r</sub>·x[n − k₀] + w[n], with w complex Gaussian. The matched filter is h[n] = x*[−n] and its output is z = y ∗ h. The peak collects all the pulse energy at the target delay.</p>
-    <p class="note">Use the Barker lab below with "Plain pulse" selected to see this. The plain pulse output is the triangle from week 4's "Υλοποίηση MF" slide. Remember that np.convolve / conv adds a delay of L−1 samples you must subtract.</p>
+  <div class="step" id="r-bin">
+    <h3><span class="n">3.4</span>Discrete samples: bin resolution</h3>
+    <p>After the ADC, time only exists at multiples of \(T_s = 1/f_s\). The receiver can only say "the echo started at sample k₀", so the estimated delay and range are</p>
+    <div class="eq">\[ \hat t_0 = k_0\,T_s, \qquad \hat R_0 = \frac{c}{2}\,k_0\,T_s = \frac{c\,k_0}{2 f_s} \]</div>
+    <p>Each sample therefore covers a range "bin" of width (week 3b p.2)</p>
+    <div class="eq">\[ \Delta R_{bin} = \frac{c}{2}\cdot\frac{1}{f_s} \]</div>
+    <p>The slide calls this the worst-case accuracy (σφάλμα στην εκτίμηση της απόστασης): the true R₀ can be anywhere inside \([\tfrac{c}{2}k_0T_s,\ \tfrac{c}{2}(k_0+1)T_s]\). The lecturer calls it "bin resolution is the result of sampling".</p>
+    <div class="box key"><div class="lbl">Do not confuse</div><p><b>ΔR = c/(2B)</b> is resolution: can I separate two targets? Set by the waveform's bandwidth.<br><b>ΔR<sub>bin</sub> = c/(2f<sub>s</sub>)</b> is the grid spacing: how finely do I sample range? Set by the ADC.<br>Raising f<sub>s</sub> gives you more samples per resolution cell (f<sub>s</sub>/B of them), but two targets closer than c/(2B) still merge. Week 7c p.6 makes the same point: "Range resolution remains the same since it depends on the pulse BW B. I have more samples per range bin."</p></div>
+    <div class="lab">
+      <div class="lab-head"><h4>Range quantization</h4><span class="tag">week 3b p.2</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="qR">True target range R₀ <output id="qRO"></output></label><input type="range" id="qR" min="500" max="3000" step="5" value="1730"></div>
+        <div class="ctl"><label for="qFs">Sampling rate f<sub>s</sub> <output id="qFsO"></output></label><input type="range" id="qFs" min="0.2" max="4" step="0.1" value="1"></div>
+      </div>
+      <canvas id="cvQ" aria-label="Sampled echo and range bins"></canvas>
+      <div class="readouts" id="qRO2"></div>
+      <div class="try"><b>Try it</b><p>Slide R₀ slowly. The estimate jumps in steps of ΔR<sub>bin</sub> while the true range moves smoothly: the error is a sawtooth. Double f<sub>s</sub> and the steps halve.</p></div>
+    </div>
+    <details class="worked"><summary><span>Worked example</span> The week 7c slide: f<sub>s</sub> = 2·10⁵ Hz, R₀ = 3.7 km. Which bin is the target in?</summary>
+      <div class="body">
+        <p>ΔR<sub>bin</sub> = 3·10⁸/(2 × 2·10⁵) = 750 m.</p>
+        <p>t₀ = 2 × 3700 / 3·10⁸ = 24.67 µs, so t₀·f<sub>s</sub> = 4.93 and k₀ = round(4.93) = 5.</p>
+        <p>Bin index 5 counting from 0 is the <b>6th</b> bin counting from 1, which is the "Target (6th) range bin" in the slide caption. The estimated range is 5 × 750 = 3750 m, an error of 50 m.</p>
+      </div>
+    </details>
   </div>
+
+  <div class="step" id="r-model">
+    <h3><span class="n">3.5</span>The discrete signal model</h3>
+    <p>This is the model your project code implements (week 3b p.5, written in Greek on the slide). Build it line by line:</p>
+    <ol>
+      <li><b>Transmit</b> the pulse x(t). (Μεταδίδω το x(t).)</li>
+      <li><b>Receive</b> a scaled, delayed copy plus noise:
+        <div class="eq">\[ y(t) = \sqrt{P_r}\;x(t - t_0) + w(t) \]</div>
+        P<sub>r</sub> is the received power from the radar equation (λαμβανόμενη ισχύς). The amplitude is \(\sqrt{P_r}\) because power is amplitude squared: \(|\sqrt{P_r}\,x|^2 = P_r\) when |x| = 1.</li>
+      <li><b>Sample</b> at t = n/f<sub>s</sub>:
+        <div class="eq">\[ y[n] = \sqrt{P_r}\;x\!\left(\frac{n}{f_s} - \frac{2R_0}{c}\right) + w\!\left(\frac{n}{f_s}\right) \]</div>
+        The samples x[n] are taken from one pulse of amplitude 1.</li>
+      <li><b>Noise.</b> w[n] is complex white Gaussian noise with zero mean and variance σ² (σ² = 1 in the slide: <code>randn</code>). So the per-sample SNR is \(P_r/\sigma^2\).</li>
+      <li><b>Implementation shortcut</b> (week 4 p.3, Επεξήγηση): for a target at R₀, compute how many samples the echo is delayed, \(k_0 = \text{round}(2R_0 f_s/c)\), and shift:
+        <div class="eq">\[ y[k] = a\,x[k-k_0] + w[k] \]</div>
+        This is the discrete version of \(y(t) = a\,x(t - t_0)\).</li>
+    </ol>
+    <div class="codehead"><span>Signal model in Python</span></div>
+<pre class="code"><code>import numpy as np
+c, fs, PRI = 3e8, 1e6, 1e-3
+tau, R0, SNRdB = 10e-6, 3e3, 10
+
+N  = int(PRI*fs)                    # samples in one PRI (range bins)
+L  = int(round(tau*fs))             # samples in the pulse
+x  = np.ones(L, dtype=complex)      # rectangular pulse, amplitude 1
+k0 = int(round(2*R0/c*fs))          # echo delay in samples
+
+Pr    = 10**(SNRdB/10)              # with noise variance 1, SNR = Pr
+y     = np.zeros(N, dtype=complex)
+y[k0:k0+L] = np.sqrt(Pr)*x          # delayed, scaled echo
+w     = (np.random.randn(N) + 1j*np.random.randn(N))/np.sqrt(2)  # variance 1
+y    += w</code></pre>
+  </div>
+
+  <div class="step" id="r-mf">
+    <h3><span class="n">3.6</span>The matched filter</h3>
+    <p><b>The problem.</b> With noise added, any single sample of y[n] is unreliable: a noise spike can look like an echo, and a weak echo can hide below the noise. The slide's sketch (week 3b p.3) shows a clean pulse on the left and the same pulse plus AWGN on the right.</p>
+    <p><b>The idea.</b> Before deciding, collect <i>all</i> the energy of the pulse into a single instant, the sampling instant. Signal samples add up coherently (amplitudes add), while noise samples add incoherently (only powers add). The longer the pulse, the bigger the advantage.</p>
+    <h4>Derivation (why h[n] = x*[−n])</h4>
+    <p>Filter the received signal with some filter h and look at the output at one instant. The signal part is \(s = \sum_i h[i]\,x[-i]\). With white noise of variance σ², the noise part has variance \(\sigma^2\sum_i|h[i]|^2\). The output SNR is</p>
+    <div class="eq">\[ \text{SNR}_{out} = \frac{\left|\sum_i h[i]\,x[-i]\right|^2}{\sigma^2\sum_i |h[i]|^2} \;\le\; \frac{\sum_i|h[i]|^2\,\sum_i|x[-i]|^2}{\sigma^2\sum_i|h[i]|^2} = \frac{E_x}{\sigma^2} \]</div>
+    <p>The inequality is Cauchy–Schwarz, and equality holds exactly when \(h[i] = x^*[-i]\). So:</p>
+    <div class="eq">\[ \boxed{\,h[n] = x^*[-n]\,} \qquad z[n] = y[n] * h[n] = \sum_i y[i]\,x^*[i-n] \]</div>
+    <ul>
+      <li>The matched filter is the transmitted pulse, <b>time-reversed and conjugated</b> (week 3b p.4: x(t) → x(−t) → shifted to be causal, x(τ − t)).</li>
+      <li>Convolving with it is the same as <b>correlating</b> y with x: slide x along y and sum the products at each shift.</li>
+      <li>The best possible SNR is \(E_x/\sigma^2\). It depends only on the pulse <b>energy</b>, not its shape. Chapter 4 relies on this.</li>
+      <li>For a constant-amplitude pulse of L samples, \(E_x = L\cdot|a|^2\), so the SNR improves by a factor L: the processing gain is \(10\log_{10}L\) dB.</li>
+    </ul>
+    <h4>Output for a rectangular pulse</h4>
+    <p>Correlating a rectangle with itself gives a <b>triangle</b>: it rises linearly while the two rectangles overlap more, peaks at full overlap, and falls again. Base width 2τ, peak = energy A²τ (week 4 p.4, "Ενέργεια παλμού = A²τ"). In range units the triangle reaches ±cτ/2 around the target, which is the ΔR of section 3.2.</p>
+    <div class="lab">
+      <div class="lab-head"><h4>Step through the matched filter</h4><span class="tag">correlation, one shift at a time</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="mfShift">Shift l (output index) <output id="mfShiftO"></output></label><input type="range" id="mfShift" min="0" max="39" step="1" value="6"></div>
+        <div class="ctl"><label for="mfSnr">SNR per sample <output id="mfSnrO"></output></label><input type="range" id="mfSnr" min="-10" max="30" step="1" value="5"></div>
+        <div class="ctl"><label for="mfL">Pulse length L <output id="mfLO"></output></label><input type="range" id="mfL" min="2" max="12" step="1" value="8"></div>
+        <div class="ctl"><label for="mfPlay">Animation</label><button id="mfPlay">Play</button></div>
+      </div>
+      <canvas id="cvMf1" class="short" aria-label="Received samples and template"></canvas>
+      <canvas id="cvMf2" class="short" aria-label="Matched filter output built so far"></canvas>
+      <div class="readouts" id="mfRO"></div>
+      <div class="try"><b>Try it</b><p>Press Play. The purple template (the pulse) slides along the received samples. At each shift the output is the sum of sample-by-sample products, shown in the bottom plot. The output peaks when the template sits exactly on the echo (l = k₀ = 15). Drop the SNR to 0 dB: individual samples look random, but the output still peaks in the right place. Raise L and the peak stands higher above the noise.</p></div>
+    </div>
+    <div class="box key"><div class="lbl">Implementation detail · week 4 p.2</div><p>With <code>np.convolve(y, h)</code> or MATLAB <code>conv(y, h)</code>, the output is L−1 samples longer than y, and the peak for a target at k₀ appears at index <b>k₀ + L − 1</b>. The lecturer's annotation: "delayed after convolution with g<sub>Rx</sub>[n]". Subtract L−1 before converting to range, or use correlation directly.</p></div>
+    <div class="codehead"><span>Matched filter in Python (continues the signal-model code)</span></div>
+<pre class="code"><code>h = np.conj(x[::-1])                # h[n] = x*[-n]
+z = np.convolve(y, h)               # full convolution, length N+L-1
+k_peak = np.argmax(np.abs(z)) - (L-1)   # undo the filter delay
+R_hat  = k_peak * c / (2*fs)
+print(f"estimated range {R_hat:.0f} m, bin size {c/(2*fs):.0f} m")
+# processing gain: SNR_out = L * SNR_in  ->  10*log10(L) dB</code></pre>
+  </div>
+
+  <div class="box mistake"><div class="lbl">Common mistakes in chapter 3</div><ul>
+    <li>Thinking higher f<sub>s</sub> improves range resolution. It only makes bins smaller.</li>
+    <li>Forgetting the τ in R<sub>ua</sub> = c(T−τ)/2 when the question gives a large duty cycle.</li>
+    <li>Forgetting the L−1 sample delay of the convolution.</li>
+    <li>Off-by-one with bin numbers: MATLAB counts from 1, Python from 0. State which one you use.</li>
+    <li>Not conjugating the template. For a real rectangle it doesn't matter; for a complex chirp (week 5) it does.</li>
+  </ul></div>
+  <label class="done-row"><input type="checkbox" class="done" data-sec="ranging"> I've finished chapter 3</label>
 </section>
 
-<!-- ============ 4 BARKER ============ -->
+<!-- =====================================================================
+     CHAPTER 4
+===================================================================== -->
 <section class="topic" id="barker">
-  <div class="eyebrow">Week 4 · Pulse compression</div>
-  <h2>4. Barker codes: long-pulse energy with short-pulse resolution</h2>
-  <p>A long pulse has high energy E = A²τ, which helps detection, but poor resolution cτ/2. Peak power A² is limited by the hardware. The fix: keep the long pulse and flip the sign of N chips of length τ<sub>c</sub> = τ/N. The energy is unchanged, the bandwidth becomes 1/τ<sub>c</sub>, and the matched filter compresses the echo into a peak about τ<sub>c</sub> wide.</p>
-  <div class="formulas">
-    <div class="f">E = A²τ (unchanged)</div><div class="f">B ≈ 1/τ<sub>c</sub></div><div class="f">ΔR<sub>c</sub> = <b>cτ<sub>c</sub>/2</b></div><div class="f">compression = τ/τ<sub>c</sub> = N</div><div class="f">Barker: peak N, sidelobes ≤ 1</div>
+  <div class="eyebrow">Chapter 4 · week 4</div>
+  <h2>Pulse compression with Barker codes</h2>
+
+  <div class="step" id="k-conflict">
+    <h3><span class="n">4.1</span>The conflict between energy and resolution</h3>
+    <p>From chapter 3 we know two facts about a plain pulse of amplitude A and width τ (week 4 p.4):</p>
+    <ul>
+      <li>The matched-filter peak, and so the detection SNR, is set by the pulse <b>energy</b> \(E = A^2\tau\). High energy is good: it beats the noise (καλύτερη επίδοση σε AWGN).</li>
+      <li>The range resolution is \(\Delta R = c\tau/2\). A short pulse is good for resolution.</li>
+    </ul>
+    <p>So the slide's table:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Choice</th><th>Energy</th><th>Resolution ΔR</th></tr></thead>
+      <tbody>
+        <tr><td>τ ↑ (long pulse)</td><td class="ok">E ↑ ✓</td><td class="bad">ΔR ↑ (worse) ✗</td></tr>
+        <tr><td>τ ↓ (short pulse)</td><td class="bad">E ↓ ✗</td><td class="ok">ΔR ↓ (better) ✓</td></tr>
+      </tbody>
+    </table></div>
+    <p>"Why not keep τ short and raise the amplitude A?" Because the transmitter has a <b>peak-power limit</b> (όριο μεταδιδόμενης ισχύος). The power amplifier can only produce so much instantaneous power, so A is capped. We want a <i>long</i> pulse with high energy (θέλουμε να μεταδίδουμε παλμούς με υψηλή ενέργεια) that still resolves like a short one.</p>
+    <details class="worked"><summary><span>Worked example</span> Peak power 1 kW, need ΔR = 15 m and pulse energy 1 mJ. Can a plain pulse do it?</summary>
+      <div class="body">
+        <p>For ΔR = 15 m: τ = 2ΔR/c = 0.1 µs. Energy = 1000 W × 0.1 µs = 0.1 mJ. Too little, by a factor of 10.</p>
+        <p>For 1 mJ at 1 kW: τ = 1 µs, which gives ΔR = 150 m. Too coarse.</p>
+        <p>Solution: a 1 µs pulse coded with 10 chips of 0.1 µs. Energy 1 mJ and resolution 15 m. That is pulse compression.</p>
+      </div>
+    </details>
   </div>
 
-  <div class="lab">
-    <div class="lab-head"><h3>Pulse-compression lab</h3><span class="tag">τ<sub>c</sub> = 1 µs · f<sub>s</sub> = 4 MHz</span></div>
-    <div class="controls">
-      <div class="ctl"><label for="bkType">Waveform</label><select id="bkType"><option value="barker" selected>Barker-coded pulse</option><option value="plain">Plain pulse (same length and energy)</option></select></div>
-      <div class="ctl"><label for="bkN">Code length N</label><select id="bkN"><option>2</option><option>3</option><option>4</option><option>5</option><option>7</option><option>11</option><option selected>13</option></select></div>
-      <div class="ctl"><label for="bkSnr">SNR per sample <output id="bkSnrO"></output></label><input type="range" id="bkSnr" min="-20" max="30" step="1" value="0"></div>
-      <div class="ctl"><label for="bkR1">Target 1 range <output id="bkR1O"></output></label><input type="range" id="bkR1" min="300" max="6000" step="15" value="3000"></div>
-      <div class="ctl"><label for="bkR2">Target 2 range <output id="bkR2O"></output></label><input type="range" id="bkR2" min="300" max="6000" step="15" value="3300"></div>
-      <div class="ctl"><label for="bkTwo">Targets</label><select id="bkTwo"><option value="2" selected>Two targets</option><option value="1">Target 1 only</option></select></div>
-    </div>
-    <div class="row"><button id="bkNoise">New noise sample</button><span class="note" id="bkCode"></span></div>
-    <canvas id="cvBkTx" class="short" aria-label="Transmitted pulse"></canvas>
-    <canvas id="cvBkRx" class="short" aria-label="Received signal"></canvas>
-    <canvas id="cvBkMf" aria-label="Matched filter output"></canvas>
-    <div class="readouts" id="bkRO"></div>
-    <div class="try">Try it: with two targets 300 m apart, switch between <b>Barker</b> and <b>Plain</b>. Both waveforms carry the same energy, but only the Barker code separates the targets (ΔR<sub>c</sub> = 150 m vs 1950 m). Lower the SNR to −10 dB: the received signal is buried, yet the MF peak still stands out thanks to the processing gain 10·log₁₀(samples in pulse).</div>
+  <div class="step" id="k-idea">
+    <h3><span class="n">4.2</span>The idea: phase-code a long pulse</h3>
+    <p>Keep the long pulse of width τ and constant amplitude B, so the energy stays \(E_x = \int_0^\tau |x(t)|^2dt = B^2\tau\). Split it into N <b>chips</b> of width</p>
+    <div class="eq">\[ \tau_c = \frac{\tau}{N} \]</div>
+    <p>and multiply each chip by +1 or −1 (a phase of 0 or 180°). This is binary phase coding, like BPSK in digital communications (week 4 p.5).</p>
+    <ul>
+      <li>The <b>energy</b> is unchanged: flipping the sign doesn't change |x|².</li>
+      <li>The signal now changes sign as fast as every τ<sub>c</sub> seconds, so its <b>bandwidth</b> grows to \(B \approx 1/\tau_c\) (μεγαλύτερο bandwidth).</li>
+      <li>After the matched filter, the output peak is about τ<sub>c</sub> wide, so the <b>resolution</b> is that of a short pulse:</li>
+    </ul>
+    <div class="eq">\[ \Delta R_c = \frac{c\,\tau_c}{2} = \frac{c}{2B}, \qquad \text{compression ratio} = \frac{\tau}{\tau_c} = N = B\tau \]</div>
+    <p>The name "pulse compression": the matched filter squeezes a long transmitted pulse into a narrow output peak. The product Bτ (time–bandwidth product) is N, and for a plain pulse it is 1.</p>
   </div>
+
+  <div class="step" id="k-acf">
+    <h3><span class="n">4.3</span>Why Barker codes: the autocorrelation</h3>
+    <p>The matched-filter output of a code is its <b>autocorrelation</b>: for each lag k, overlap the code with a shifted copy of itself and sum the products,</p>
+    <div class="eq">\[ r[k] = \sum_{i} c_i\,c_{i+k} \]</div>
+    <p>At lag 0 every product is (±1)² = 1, so the peak is always \(r[0] = N\). The other lags are the <b>sidelobes</b>. A random ±1 code can have big sidelobes that look like fake targets. <b>Barker codes</b> have the smallest possible sidelobes: \(|r[k]| \le 1\) for every k ≠ 0.</p>
+    <details class="worked"><summary><span>Worked example</span> Compute the autocorrelation of Barker-5 = [+ + + − +] by hand.</summary>
+      <div class="body">
+        <p>Lag 0: 1+1+1+1+1 = <b>5</b> (the peak).</p>
+        <p>Lag 1: c₀c₁ + c₁c₂ + c₂c₃ + c₃c₄ = (+1)(+1) + (+1)(+1) + (+1)(−1) + (−1)(+1) = 1 + 1 − 1 − 1 = <b>0</b>.</p>
+        <p>Lag 2: c₀c₂ + c₁c₃ + c₂c₄ = 1 − 1 + 1 = <b>1</b>.</p>
+        <p>Lag 3: c₀c₃ + c₁c₄ = −1 + 1 = <b>0</b>.</p>
+        <p>Lag 4: c₀c₄ = <b>1</b>.</p>
+        <p>The autocorrelation is symmetric, so r = [1, 0, 1, 0, <b>5</b>, 0, 1, 0, 1]. Peak 5, sidelobes ≤ 1. Peak sidelobe level = 20·log₁₀(1/5) = −14 dB.</p>
+      </div>
+    </details>
+    <div class="tablewrap"><table>
+      <thead><tr><th>N</th><th>Barker code</th><th>Peak sidelobe level</th></tr></thead>
+      <tbody>
+        <tr><td>2</td><td class="mono">+ −  (or + +)</td><td class="mono">−6.0 dB</td></tr>
+        <tr><td>3</td><td class="mono">+ + −</td><td class="mono">−9.5 dB</td></tr>
+        <tr><td>4</td><td class="mono">+ + − +  (or + + + −)</td><td class="mono">−12.0 dB</td></tr>
+        <tr><td>5</td><td class="mono">+ + + − +</td><td class="mono">−14.0 dB</td></tr>
+        <tr><td>7</td><td class="mono">+ + + − − + −</td><td class="mono">−16.9 dB</td></tr>
+        <tr><td>11</td><td class="mono">+ + + − − − + − − + −</td><td class="mono">−20.8 dB</td></tr>
+        <tr><td>13</td><td class="mono">+ + + + + − − + + − + − +</td><td class="mono">−22.3 dB</td></tr>
+      </tbody>
+    </table></div>
+    <p>No Barker codes longer than 13 are known (and none exist for odd lengths above 13), so the best Barker compression ratio is 13 and the best sidelobe level is −22.3 dB. Longer compression needs other codes (polyphase codes, week 4–5 in the syllabus) or LFM chirps (week 5).</p>
+    <div class="lab">
+      <div class="lab-head"><h4>Autocorrelation explorer</h4><span class="tag">type your own code too</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="acCode">Code (use + and −)</label><input type="text" id="acCode" value="+++-+" aria-describedby="acHint"></div>
+        <div class="ctl"><label for="acPreset">Presets</label><select id="acPreset"><option value="">choose…</option><option value="+-">Barker-2</option><option value="++-">Barker-3</option><option value="++-+">Barker-4</option><option value="+++-+" selected>Barker-5</option><option value="+++--+-">Barker-7</option><option value="+++---+--+-">Barker-11</option><option value="+++++--++-+-+">Barker-13</option><option value="+++++++++++++">13 chips, all + (plain pulse)</option><option value="+-+-+-+-+-+-+">13 chips, alternating</option><option value="++-+--+++-+--">13 chips, random-looking</option></select></div>
+        <div class="ctl"><label for="acLag">Lag k <output id="acLagO"></output></label><input type="range" id="acLag" min="-4" max="4" step="1" value="1"></div>
+      </div>
+      <p class="note" id="acHint">The table shows the code and its copy shifted by k. The highlighted row is the product of each overlapping pair; their sum is r[k].</p>
+      <div class="corr" id="acTable"></div>
+      <div class="two">
+        <div><canvas id="cvAc" class="short" aria-label="Autocorrelation"></canvas><p class="note">Autocorrelation r[k] (the matched-filter output, one sample per chip).</p></div>
+        <div><canvas id="cvAcSpec" class="short" aria-label="Spectrum of coded vs plain pulse"></canvas><p class="note">Spectrum in dB vs normalized frequency f·τ<sub>c</sub>: coded pulse (purple) vs plain pulse of the same length (grey). Compare with week 4 p.5.</p></div>
+      </div>
+      <div class="readouts" id="acRO"></div>
+      <div class="try"><b>Try it</b><p>Step the lag from −N+1 to N−1 for Barker-13 and check every sidelobe is 0 or ±1. Then pick "13 chips, alternating": its spectrum is wide too, but its sidelobes are huge (r[2] = 11), so a single target would look like a train of targets. Bandwidth alone is not enough; the code needs low autocorrelation sidelobes. Try inventing a 7-chip code that beats Barker-7. You can't.</p></div>
+    </div>
+  </div>
+
+  <div class="step" id="k-lab">
+    <h3><span class="n">4.4</span>Pulse compression in action</h3>
+    <p>Now put the code in the full radar chain: transmit, delay, add noise, matched-filter. The comparison is fair: the plain pulse has the same length and amplitude, and so the same energy.</p>
+    <div class="lab">
+      <div class="lab-head"><h4>Pulse-compression lab</h4><span class="tag">τ<sub>c</sub> = 1 µs · f<sub>s</sub> = 4 MHz (4 samples per chip)</span></div>
+      <div class="controls">
+        <div class="ctl"><label for="bkType">Waveform</label><select id="bkType"><option value="barker" selected>Barker-coded pulse</option><option value="plain">Plain pulse (same length and energy)</option></select></div>
+        <div class="ctl"><label for="bkN">Code length N</label><select id="bkN"><option>2</option><option>3</option><option>4</option><option>5</option><option>7</option><option>11</option><option selected>13</option></select></div>
+        <div class="ctl"><label for="bkSnr">SNR per sample <output id="bkSnrO"></output></label><input type="range" id="bkSnr" min="-20" max="30" step="1" value="0"></div>
+        <div class="ctl"><label for="bkR1">Target 1 range <output id="bkR1O"></output></label><input type="range" id="bkR1" min="300" max="6000" step="15" value="3000"></div>
+        <div class="ctl"><label for="bkR2">Target 2 range <output id="bkR2O"></output></label><input type="range" id="bkR2" min="300" max="6000" step="15" value="3300"></div>
+        <div class="ctl"><label for="bkA2">Target 2 strength <output id="bkA2O"></output></label><input type="range" id="bkA2" min="-30" max="0" step="1" value="0"></div>
+        <div class="ctl"><label for="bkTwo">Targets</label><select id="bkTwo"><option value="2" selected>Two targets</option><option value="1">Target 1 only</option></select></div>
+      </div>
+      <div class="row"><button id="bkNoise">New noise sample</button><span class="note" id="bkCode"></span></div>
+      <canvas id="cvBkTx" class="short" aria-label="Transmitted pulse"></canvas>
+      <canvas id="cvBkRx" class="short" aria-label="Received signal"></canvas>
+      <canvas id="cvBkMf" aria-label="Matched filter output"></canvas>
+      <div class="readouts" id="bkRO"></div>
+      <div class="try"><b>Try it</b>
+        <p>1. <b>Resolution.</b> Two targets 300 m apart. Switch between Barker and Plain. Same energy, but only the Barker code separates them (ΔR<sub>c</sub> = 150 m vs 1950 m).</p>
+        <p>2. <b>Processing gain.</b> Lower the SNR to −10 dB. The received signal is buried in noise, yet the MF peak still stands out: 52 samples give 10·log₁₀(52) ≈ 17 dB of gain.</p>
+        <p>3. <b>Sidelobe masking.</b> Set SNR to 30 dB, target 2 at −25 dB and move it 2–5 chips (300–750 m) from target 1. The weak target sinks among the −22 dB sidelobes of the strong one. That is the practical limit of Barker codes.</p>
+      </div>
+    </div>
+    <div class="codehead"><span>Barker pulse compression in Python</span></div>
+<pre class="code"><code>barker13 = np.array([1,1,1,1,1,-1,-1,1,1,-1,1,-1,1])
+spc = 4                                   # samples per chip -> tau_c = spc/fs
+x   = np.repeat(barker13, spc).astype(complex)
+L   = len(x)                              # 52 samples, same energy as a 52-sample rect
+
+y = np.zeros(N, complex); y[k0:k0+L] = np.sqrt(Pr)*x
+y += (np.random.randn(N) + 1j*np.random.randn(N))/np.sqrt(2)
+
+z = np.convolve(y, np.conj(x[::-1]))      # matched filter = pulse compression
+k_hat = np.argmax(np.abs(z)) - (L-1)
+print("range:", k_hat*c/(2*fs))
+# plot 20*log10(abs(z)/abs(z).max()) to see the -22.3 dB sidelobes</code></pre>
+  </div>
+
+  <div class="step" id="k-limits">
+    <h3><span class="n">4.5</span>Summary and limitations</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th></th><th>Plain pulse, width τ</th><th>Barker-N, chips τ<sub>c</sub> = τ/N</th></tr></thead>
+      <tbody>
+        <tr><td>Energy</td><td class="mono">A²τ</td><td class="mono">A²τ (same)</td></tr>
+        <tr><td>Bandwidth</td><td class="mono">≈ 1/τ</td><td class="mono">≈ 1/τ_c = N/τ</td></tr>
+        <tr><td>Range resolution</td><td class="mono">cτ/2</td><td class="mono">cτ_c/2 = cτ/(2N)</td></tr>
+        <tr><td>MF output</td><td>triangle, base 2τ</td><td>narrow peak N, sidelobes ≤ 1</td></tr>
+        <tr><td>Peak sidelobe</td><td>none</td><td class="mono">20·log₁₀(1/N) dB</td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li><b>Length limit:</b> N ≤ 13, so the compression ratio is at most 13.</li>
+      <li><b>Sidelobes:</b> −22.3 dB at best. A strong target's sidelobes can hide a weak neighbour.</li>
+      <li><b>Doppler sensitivity:</b> a moving target adds a phase rotation across the pulse, which breaks the ±1 pattern and raises the sidelobes. The ambiguity function (later in the course) studies this.</li>
+      <li><b>Alternatives:</b> longer polyphase codes and LFM chirps (week 5) give much larger time–bandwidth products.</li>
+    </ul>
+  </div>
+
+  <div class="box mistake"><div class="lbl">Common mistakes in chapter 4</div><ul>
+    <li>Using the total pulse length τ in ΔR for a coded pulse. Use the chip width τ<sub>c</sub>.</li>
+    <li>Saying pulse compression "increases energy". It doesn't; the energy is the same as an uncoded pulse of the same length. It gives that energy with better resolution.</li>
+    <li>Computing the sidelobe level in power with 10·log₁₀. The MF output is an amplitude: PSL = 20·log₁₀(1/N).</li>
+  </ul></div>
+  <label class="done-row"><input type="checkbox" class="done" data-sec="barker"> I've finished chapter 4</label>
 </section>
 
-<!-- ============ CALCULATOR ============ -->
+<!-- =====================================================================
+     CALCULATOR
+===================================================================== -->
 <section class="topic" id="calc">
   <div class="eyebrow">Worksheet helper</div>
   <h2>Parameter calculator</h2>
-  <p>Type the numbers from a problem (scientific notation works, e.g. 2e5). Every result shows the formula with your numbers substituted, so you can copy the working into your answer. It starts with the week 7c slide values.</p>
+  <p>Type the numbers from a problem (scientific notation works, e.g. 2e5). Every result shows the formula with your numbers substituted, so you can follow the working. It starts with the week 7c slide values (f<sub>s</sub> = 2·10⁵ Hz, PRI = 1 ms, DC = 0.1, R₀ = 3.7 km).</p>
   <div class="lab">
     <div class="controls">
       <div class="ctl"><label for="cFs">Sampling rate f<sub>s</sub> (Hz)</label><input type="text" id="cFs" value="2e5" inputmode="decimal"></div>
@@ -256,10 +869,13 @@ html{scroll-behavior:smooth}
   </div>
 </section>
 
-<!-- ============ QUIZ ============ -->
+<!-- =====================================================================
+     QUIZ
+===================================================================== -->
 <section class="topic" id="quiz">
   <div class="eyebrow">Check yourself</div>
   <h2>Quiz</h2>
+  <p>Numeric problems are generated at random, so you can practise as long as you like. Answers within 2% count as correct.</p>
   <div class="numq">
     <div class="lab-head"><h3>Numeric problem</h3><span class="tag" id="nqTag"></span></div>
     <p id="nqText"></p>
@@ -279,18 +895,19 @@ const c=3e8;
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const $=id=>document.getElementById(id);
 const redraws=[];
-function rgba(hex,a){hex=hex.replace('#','');if(hex.length===3)hex=hex.split('').map(x=>x+x).join('');const n=parseInt(hex,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
-function si(v,unit,d=3){if(!isFinite(v))return '—';if(v===0)return '0 '+unit;const P=[[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n']];const a=Math.abs(v);for(const[f,p]of P){if(a>=f*0.9995)return +(v/f).toPrecision(d)+' '+p+unit;}return +(v/1e-9).toPrecision(d)+' n'+unit;}
+function rgba(hex,a){hex=(hex||'#888888').replace('#','');if(hex.length===3)hex=hex.split('').map(x=>x+x).join('');const n=parseInt(hex,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+function si(v,unit,d=3){if(!isFinite(v))return '—';if(v===0)return '0 '+unit;const P=[[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n'],[1e-12,'p']];const a=Math.abs(v);for(const[f,p]of P){if(a>=f*0.9995)return +(v/f).toPrecision(d)+' '+p+unit;}return v.toExponential(2)+' '+unit;}
 const num=(v,d=4)=>+(+v).toPrecision(d)+'';
 let seed=12345;function rng(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
 function gauss(){let u=0,v=0;while(u===0)u=rng();v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
 
-function setup(cv){const dpr=window.devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);return{ctx,w,h};}
+function setup(cv){const dpr=window.devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;cv.width=Math.max(1,Math.round(w*dpr));cv.height=Math.max(1,Math.round(h*dpr));const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);return{ctx,w,h};}
 function ticks(a,b,n=5){const span=b-a;if(!(span>0))return[a];let step=Math.pow(10,Math.floor(Math.log10(span/n)));const e=span/n/step;if(e>=7.5)step*=10;else if(e>=3.5)step*=5;else if(e>=1.5)step*=2;const out=[];for(let v=Math.ceil(a/step-1e-9)*step;v<=b+step*1e-9;v+=step)out.push(+v.toFixed(10));return out;}
 const tk=v=>{if(Math.abs(v)<1e-12)return '0';const a=Math.abs(v);if(a>=1e5||a<1e-3)return v.toExponential(0);return +v.toPrecision(4)+'';};
 
 function plot(cv,o){
-  const{ctx,w,h}=setup(cv);const m={l:46,r:12,t:12,b:34};
+  const{ctx,w,h}=setup(cv);const m={l:50,r:12,t:12,b:34};
   const[x0,x1]=o.x,[y0,y1]=o.y;const pw=w-m.l-m.r,ph=h-m.t-m.b;
   const X=v=>m.l+(v-x0)/(x1-x0)*pw,Y=v=>m.t+ph-(v-y0)/(y1-y0)*ph;
   const mono=css('--font-mono'),muted=css('--muted'),grid=css('--grid'),ink=css('--ink');
@@ -303,53 +920,106 @@ function plot(cv,o){
   if(o.ylabel){ctx.save();ctx.translate(11,m.t+ph/2);ctx.rotate(-Math.PI/2);ctx.textBaseline='middle';ctx.fillText(o.ylabel,0,0);ctx.restore();}
   ctx.save();ctx.beginPath();ctx.rect(m.l,m.t,pw,ph);ctx.clip();
   for(const b of(o.bands||[])){ctx.fillStyle=rgba(b.color,b.alpha??.12);ctx.fillRect(X(b.from),m.t,X(b.to)-X(b.from),ph);}
+  for(const hl of(o.hlines||[])){ctx.strokeStyle=hl.color;ctx.setLineDash([4,4]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(m.l,Y(hl.y));ctx.lineTo(m.l+pw,Y(hl.y));ctx.stroke();ctx.setLineDash([]);if(hl.label){ctx.fillStyle=hl.color;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText(hl.label,m.l+pw-4,Y(hl.y)-2);}}
   for(const s of o.series){
     ctx.strokeStyle=s.color;ctx.fillStyle=s.color;ctx.lineWidth=s.width||1.8;ctx.setLineDash(s.dash||[]);
     if(s.rects){for(const[a,b,hh]of s.rects){ctx.fillStyle=rgba(s.color,.85);ctx.fillRect(X(a),Y(hh),Math.max(1.5,X(b)-X(a)),Y(0)-Y(hh));}}
-    else if(s.stem){for(let i=0;i<s.xs.length;i++){const x=X(s.xs[i]),y=Y(s.ys[i]);ctx.beginPath();ctx.moveTo(x,Y(Math.max(y0,0)));ctx.lineTo(x,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,2.6,0,7);ctx.fill();}}
+    else if(s.stem){const base=Y(Math.max(y0,Math.min(y1,s.base??0)));for(let i=0;i<s.xs.length;i++){const x=X(s.xs[i]),y=Y(s.ys[i]);ctx.beginPath();ctx.moveTo(x,base);ctx.lineTo(x,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,s.r||2.6,0,7);ctx.fill();}}
     else{ctx.beginPath();for(let i=0;i<s.xs.length;i++){const x=X(s.xs[i]),y=Y(s.ys[i]);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}
   }
   ctx.setLineDash([]);
-  for(const v of(o.vlines||[])){ctx.strokeStyle=v.color;ctx.setLineDash([4,4]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(X(v.x),m.t);ctx.lineTo(X(v.x),m.t+ph);ctx.stroke();ctx.setLineDash([]);if(v.label){ctx.fillStyle=v.color;ctx.textAlign=X(v.x)>m.l+pw-60?'right':'left';ctx.textBaseline='top';ctx.fillText(v.label,X(v.x)+(ctx.textAlign==='left'?4:-4),m.t+2);}}
+  for(const v of(o.vlines||[])){ctx.strokeStyle=v.color;ctx.setLineDash([4,4]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(X(v.x),m.t);ctx.lineTo(X(v.x),m.t+ph);ctx.stroke();ctx.setLineDash([]);if(v.label){ctx.fillStyle=v.color;ctx.textAlign=X(v.x)>m.l+pw-80?'right':'left';ctx.textBaseline='top';ctx.fillText(v.label,X(v.x)+(ctx.textAlign==='left'?4:-4),m.t+2+(v.row||0)*13);}}
   ctx.restore();
-  ctx.strokeStyle=rgba(ink.startsWith('#')?ink:'#888888',.35);ctx.strokeRect(m.l+.5,m.t+.5,pw-1,ph-1);
+  ctx.strokeStyle=rgba(ink,.35);ctx.strokeRect(m.l+.5,m.t+.5,pw-1,ph-1);
+  return{X,Y,m,pw,ph,ctx};
 }
 function ro(el,items){$(el).innerHTML=items.map(([k,v,cls])=>`<div class="ro"><span>${k}</span><b${cls?` class="${cls}"`:''}>${v}</b></div>`).join('');}
 function bind(ids,fmts,fn){ids.forEach((id,i)=>{const el=$(id);const upd=()=>{if(fmts[i]&&$(id+'O'))$(id+'O').textContent=fmts[i](+el.value);};el.addEventListener('input',()=>{upd();fn();});upd();});redraws.push(fn);}
 
-/* ---------- 1. block diagram ---------- */
+/* ===== 1.3 waveforms ===== */
+function drawWave(){
+  const{ctx,w,h}=setup($('cvWave'));const rows=[['CW',t=>Math.cos(2*Math.PI*14*t)],['Pulsed',t=>{const p=t%0.25;return p<0.07?Math.cos(2*Math.PI*40*t):0;}],['FMCW',t=>{const p=t%0.5;return Math.cos(2*Math.PI*(4*p+60*p*p));}]];
+  const lh=h/3,mono=css('--font-mono');ctx.font='12px '+mono;
+  rows.forEach(([name,f],i)=>{const y0=lh*i+lh/2;ctx.fillStyle=css('--muted');ctx.textBaseline='middle';ctx.textAlign='left';ctx.fillText(name,8,y0);ctx.strokeStyle=css('--tx');ctx.lineWidth=1.4;ctx.beginPath();const L=70,W=w-L-10;for(let px=0;px<=W;px++){const t=px/W;const y=y0-f(t)*lh*0.36;px?ctx.lineTo(L+px,y):ctx.moveTo(L+px,y);}ctx.stroke();});
+  ctx.fillStyle=css('--echo');ctx.textAlign='right';ctx.fillText('PRI = T',w-14,lh+lh*0.1);ctx.fillText('ramp period T',w-14,2*lh+lh*0.1);
+}
+redraws.push(drawWave);
+
+/* ===== 1.4 block diagram ===== */
 const BLK={
- wg:['Waveform generator','Creates the baseband pulse x(t): a rectangle, a Barker-coded pulse or an LFM chirp. In the course this is the "BWG" (baseband waveform generator) followed by a DAC.'],
- mixu:['Mixer (up-conversion)','Multiplies the baseband pulse by cos(2πf_c t) from the oscillator, moving it up to the carrier frequency f_c.'],
- pa:['Power amplifier','Raises the signal to the transmit power. Its peak-power limit is why we cannot simply raise the amplitude A, which leads to pulse compression in week 4.'],
- dup:['Duplexer','Switches the single antenna between transmit and receive. While transmitting, the receiver is blocked, so echoes that arrive during a pulse are lost.'],
- ant:['Antenna','Radiates the pulse and collects the echo. A directional antenna points its main beam along the boresight. Its pattern is the same for Tx and Rx.'],
- lna:['Low-noise amplifier (LNA)','Amplifies the very weak echo while adding as little noise as possible. Noise added here is what the matched filter later fights.'],
- mixd:['Mixer + local oscillator (I/Q)','Mixes with cos(2πf_c t) and −sin(2πf_c t) to get the I and Q channels. This brings the echo back to baseband as a complex signal.'],
- lpf:['IF amplifier / LPF','Low-pass filters remove the 2f_c terms left by mixing, leaving y_I(t) and y_Q(t).'],
- adc:['ADC','Samples at rate f_s. This creates the range bins: each sample is a slice of c/(2f_s) metres.'],
- sp:['Signal processor','Your project lives here: matched filtering, pulse compression, Doppler FFT and the data cube.'],
+ wg:['Waveform generator','Creates the baseband pulse x(t): a rectangle, a Barker-coded pulse or an LFM chirp. In the course this is the "BWG" (baseband waveform generator) followed by a DAC. Signal here: x(t), complex baseband.'],
+ mixu:['Mixer (up-conversion)','Multiplies the baseband pulse by cos(2πf_c t) from the local oscillator, moving its spectrum from around 0 Hz to around f_c. Signal here: x(t)·cos(2πf_c t).'],
+ pa:['Power amplifier','Raises the signal to the transmit power P_t. Its peak-power limit is why we cannot simply raise the amplitude A, which motivates pulse compression (chapter 4).'],
+ dup:['Duplexer / circulator','Routes the transmitter to the antenna and the antenna to the receiver. During a pulse the receiver is protected (blanked), so echoes arriving then are lost: this creates the minimum range cτ/2 and the "eclipsing" in 3.3.'],
+ ant:['Antenna','Radiates the pulse in the direction of the main beam (gain G) and collects the echo. Its pattern is the same for Tx and Rx. Signal coming back: a·x(t−t₀)·cos(2πf_c(t−t₀)) + noise, where a follows the radar equation.'],
+ lna:['Low-noise amplifier (LNA)','Amplifies the very weak echo (often below a picowatt) while adding as little noise as possible. Its noise figure F sets the noise floor kT₀BF.'],
+ mixd:['I/Q mixers + local oscillator','Mixes with cos(2πf_c t) for I and −sin(2πf_c t) for Q (the 90° block in the week 2 diagram). This moves the echo back to 0 Hz as a complex signal and keeps its phase.'],
+ lpf:['IF amplifier / low-pass filters','Removes the 2f_c terms produced by mixing, leaving y_I(t) and y_Q(t), and limits the noise bandwidth to roughly the pulse bandwidth B.'],
+ adc:['ADC','Samples I and Q at rate f_s. Each sample interval is one range bin of c/(2f_s) metres. Output: complex samples y[n].'],
+ sp:['Signal processor','Your project lives here: matched filtering, pulse compression, arranging the data cube, Doppler FFT, detection.'],
  dp:['Data processor / display','Turns detections into tracks and displays for the end user.']
 };
 function chain(el,label,keys){const box=$(el);box.innerHTML=`<span class="lbl">${label}</span>`+keys.map((k,i)=>`${i?'<span class="arr">→</span>':''}<button class="blk" data-k="${k}" aria-pressed="false">${BLK[k][0]}</button>`).join('');}
 chain('chainTx','Tx',['wg','mixu','pa','dup','ant']);chain('chainRx','Rx',['ant','dup','lna','mixd','lpf','adc','sp','dp']);
-document.querySelectorAll('.blk').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.blk').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===b.dataset.k)); const[t,d]=BLK[b.dataset.k];$('blkInfo').innerHTML=`<b>${t}.</b> ${d}`;}));
+document.querySelectorAll('.blk').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.blk').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===b.dataset.k));const[t,d]=BLK[b.dataset.k];$('blkInfo').innerHTML=`<b>${t}</b><span>${d}</span>`;}));
 
-function drawWave(){
-  const{ctx,w,h}=setup($('cvWave'));const rows=[['CW',t=>Math.cos(2*Math.PI*14*t)],['Pulsed',t=>{const p=t%0.25;return p<0.07?Math.cos(2*Math.PI*40*t):0;}],['FMCW',t=>{const p=t%0.5;return Math.cos(2*Math.PI*(4*p+60*p*p));}]];
-  const lh=h/3,mono=css('--font-mono');ctx.font='12px '+mono;
-  rows.forEach(([name,f],i)=>{const y0=lh*i+lh/2;ctx.fillStyle=css('--muted');ctx.textBaseline='middle';ctx.fillText(name,8,y0);ctx.strokeStyle=css('--tx');ctx.lineWidth=1.4;ctx.beginPath();const L=70,W=w-L-10;for(let px=0;px<=W;px++){const t=px/W;const y=y0-f(t)*lh*0.36;px?ctx.lineTo(L+px,y):ctx.moveTo(L+px,y);}ctx.stroke();});
+/* ===== 1.5 wavelength ===== */
+const lamFreq=v=>Math.pow(10,8+v*0.03); // slider 0..100 -> 100 MHz .. 100 GHz (log)
+function lam(){const f=lamFreq(+$('lamF').value);const L=c/f;let band='—';const g=f/1e9;
+  if(g<1)band='UHF/VHF';else if(g<2)band='L';else if(g<4)band='S';else if(g<8)band='C';else if(g<12)band='X';else if(g<18)band='Ku';else if(g<27)band='K';else if(g<40)band='Ka';else if(g<75)band='V';else band='W';
+  ro('lamRO',[['frequency',si(f,'Hz')],['wavelength λ',si(L,'m')],['band',band],['f_D for 100 m/s (2v/λ)',si(2*100/L,'Hz')]]);}
+bind(['lamF'],[v=>si(lamFreq(v),'Hz')],lam);
+
+/* ===== 1.6 antenna ===== */
+function ant(){
+  const D=+$('antD').value,db=$('antSteer').value==='db';const xs=[],ys=[];
+  for(let i=0;i<=900;i++){const th=-90+180*i/900;const u=Math.PI*D*Math.sin(th*Math.PI/180);const p=Math.abs(u)<1e-9?1:Math.pow(Math.sin(u)/u,2);xs.push(th);ys.push(db?Math.max(-50,10*Math.log10(p+1e-12)):p);}
+  const bw=0.886/D*180/Math.PI;
+  plot($('cvAnt'),{x:[-90,90],y:db?[-50,3]:[0,1.05],xlabel:'angle from boresight θ (degrees)',ylabel:db?'power (dB)':'power',series:[{xs,ys,color:css('--tx')}],hlines:db?[{y:-3,color:css('--echo'),label:'−3 dB'},{y:-13.26,color:css('--muted'),label:'−13.3 dB'}]:[{y:0.5,color:css('--echo'),label:'half power'}],vlines:[{x:-bw/2,color:css('--echo')},{x:bw/2,color:css('--echo')}]});
+  ro('antRO',[['3 dB beamwidth ≈ 0.886λ/D',num(bw,3)+'°'],['first null at',num(Math.asin(Math.min(1,1/D))*180/Math.PI,3)+'°'],['first sidelobe','−13.3 dB'],['gain ≈ 4πA/λ² (square D×D)',num(10*Math.log10(4*Math.PI*D*D),3)+' dBi']]);
 }
-redraws.push(drawWave);
+bind(['antD'],[v=>v],ant);$('antSteer').addEventListener('change',ant);
 
-/* ---------- 2a. data cube ---------- */
+/* ===== 1.7 radar equation ===== */
+function req(){
+  const PtdB=+$('reqPt').value,GdB=+$('reqG').value,f=+$('reqF').value*1e9,sdB=+$('reqS').value,R=+$('reqR').value*1e3,B=Math.pow(10,+$('reqB').value)*1e6;
+  const Pt=Math.pow(10,PtdB/10),G=Math.pow(10,GdB/10),s=Math.pow(10,sdB/10),L=c/f;
+  const Pr=r=>Pt*G*G*L*L*s/(Math.pow(4*Math.PI,3)*Math.pow(r,4));
+  const Pn=1.38e-23*290*B*Math.pow(10,0.3); // F = 3 dB
+  const xs=[],ys=[];for(let i=0;i<=300;i++){const r=1e3*Math.pow(10,i/300*Math.log10(300));xs.push(r/1e3);ys.push(10*Math.log10(Pr(r)/Pn));}
+  plot($('cvReq'),{x:[1,300],y:[Math.min(-20,Math.floor(Math.min(...ys)/10)*10),Math.max(20,Math.ceil(Math.max(...ys)/10)*10)],xlabel:'range (km)',ylabel:'SNR (dB)',series:[{xs,ys,color:css('--echo')}],hlines:[{y:13,color:css('--ok'),label:'≈13 dB: typical detection threshold'}],vlines:[{x:R/1e3,color:css('--tx'),label:'R'}]});
+  const snr=10*Math.log10(Pr(R)/Pn);
+  ro('reqRO2',[['λ',si(L,'m')],['P_r',si(Pr(R),'W')],['P_r (dBm)',num(10*Math.log10(Pr(R)/1e-3),4)+' dBm'],['noise kT₀BF (F=3 dB)',si(Pn,'W')],['single-pulse SNR',num(snr,3)+' dB',snr>13?'ok':snr>0?'warn':'bad'],['×2 range →','−12.0 dB']]);
+}
+bind(['reqPt','reqG','reqF','reqS','reqR','reqB'],[v=>si(Math.pow(10,v/10),'W'),v=>v+' dBi',v=>v+' GHz',v=>si(Math.pow(10,v/10),'m²'),v=>v+' km',v=>si(Math.pow(10,v)*1e6,'Hz')],req);
+
+/* ===== 2.1 I/Q ===== */
+function iq(){
+  const A=+$('iqA').value,phi=+$('iqP').value*Math.PI/180,rot=+$('iqRot').value*Math.PI/180;
+  const cv=$('cvIq');const{ctx,w,h}=setup(cv);const cx=w/2,cy=h/2,Rr=Math.min(w,h)*0.4;
+  ctx.strokeStyle=css('--grid');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx-Rr*1.15,cy);ctx.lineTo(cx+Rr*1.15,cy);ctx.moveTo(cx,cy-Rr*1.15);ctx.lineTo(cx,cy+Rr*1.15);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,Rr,0,7);ctx.stroke();
+  ctx.font='11px '+css('--font-mono');ctx.fillStyle=css('--muted');ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText('I',cx+Rr*1.12,cy-2);ctx.fillText('Q',cx+4,cy-Rr*1.1);
+  for(let m=0;m<8;m++){const p=phi+m*rot;const x=cx+A*Rr*Math.cos(p),y=cy-A*Rr*Math.sin(p);ctx.fillStyle=rgba(css('--echo'),0.25+0.75*m/7);ctx.beginPath();ctx.arc(x,y,4,0,7);ctx.fill();}
+  const x=cx+A*Rr*Math.cos(phi),y=cy-A*Rr*Math.sin(phi);
+  ctx.strokeStyle=css('--tx');ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);ctx.stroke();
+  ctx.setLineDash([3,3]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,cy);ctx.moveTo(x,y);ctx.lineTo(cx,y);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=css('--tx');ctx.textBaseline='top';ctx.textAlign='center';ctx.fillText('I='+num(A*Math.cos(phi),2),x,cy+4);ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText('Q='+num(A*Math.sin(phi),2),cx-4,y);
+  const ms=[],Is=[],Qs=[];for(let m=0;m<=7;m+=0.05){ms.push(m);Is.push(A*Math.cos(phi+m*rot));Qs.push(A*Math.sin(phi+m*rot));}
+  const ki=[],kI=[],kQ=[];for(let m=0;m<8;m++){ki.push(m);kI.push(A*Math.cos(phi+m*rot));kQ.push(A*Math.sin(phi+m*rot));}
+  plot($('cvIq2'),{x:[0,7],y:[-1.1,1.1],xlabel:'pulse m',ylabel:'value',series:[{xs:ms,ys:Is,color:css('--tx')},{xs:ms,ys:Qs,color:css('--echo'),dash:[5,4]},{xs:ki,ys:kI,color:css('--tx'),stem:true,width:0,r:3},{xs:ki,ys:kQ,color:css('--echo'),stem:true,width:0,r:3}]});
+  ro('iqRO',[['y_I = A cos φ',num(A*Math.cos(phi),3)],['y_Q = A sin φ',num(A*Math.sin(phi),3)],['|y| = √(I²+Q²)',num(A,3)],['∠y = atan2(Q, I)',num(phi*180/Math.PI,3)+'°'],['rotation direction',rot>0?'counter-clockwise (+f_D)':rot<0?'clockwise (−f_D)':'none (f_D = 0)']]);
+}
+bind(['iqA','iqP','iqRot'],[v=>num(v,2),v=>v+'°',v=>v+'° / pulse'],iq);
+
+/* ===== 2.4 data cube ===== */
 function cube(){
   const fs=+$('dcFs').value*1e3,PRI=+$('dcPri').value*1e-3,DC=+$('dcDc').value,R0=+$('dcR').value*1e3,M=+$('dcM').value,snr=+$('dcSnr').value,mf=$('dcMf').value==='mf';
   const N=Math.max(2,Math.round(PRI*fs)),L=Math.max(1,Math.round(DC*PRI*fs)),k0true=Math.round(2*R0/c*fs),k0=k0true%N;
   const sig=Math.sqrt(Math.pow(10,-snr/10)/2);seed=777;
   const data=[];
   for(let m=0;m<M;m++){const re=new Float64Array(N),im=new Float64Array(N);for(let l=0;l<N;l++){re[l]=sig*gauss();im[l]=sig*gauss();}for(let i=0;i<L;i++){const l=k0+i;if(l<N)re[l]+=1;}
-    let col;if(mf){col=new Float64Array(N);for(let l=0;l<N;l++){let a=0,b=0;for(let i=0;i<L&&l+i<N;i++){a+=re[l+i];b+=im[l+i];}col[l]=Math.hypot(a,b);}}else{col=new Float64Array(N);for(let l=0;l<N;l++)col[l]=Math.hypot(re[l],im[l]);}
+    const col=new Float64Array(N);if(mf){for(let l=0;l<N;l++){let a=0,b=0;for(let i=0;i<L&&l+i<N;i++){a+=re[l+i];b+=im[l+i];}col[l]=Math.hypot(a,b);}}else{for(let l=0;l<N;l++)col[l]=Math.hypot(re[l],im[l]);}
     data.push(col);}
   const lo=Math.max(0,Math.min(k0-15,N-60)),hi=Math.min(N,Math.max(lo+30,k0+(mf?16:L+12)),lo+120);
   let mx=0;for(const col of data)for(let l=lo;l<hi;l++)mx=Math.max(mx,col[l]);
@@ -361,38 +1031,32 @@ function cube(){
   ctx.textBaseline='bottom';ctx.fillText('slow time: pulse m  (spacing = PRI)',mg.l+pw/2,h-1);
   ctx.textAlign='right';ctx.textBaseline='middle';const lStep=Math.max(1,Math.ceil((hi-lo)/10));for(let l=lo;l<hi;l+=lStep)ctx.fillText(l,mg.l-6,mg.t+(l-lo+.5)*ch);
   ctx.save();ctx.translate(11,mg.t+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('fast time: range bin l',0,0);ctx.restore();
-  const echo=css('--echo');ctx.fillStyle=echo;ctx.beginPath();const yk=mg.t+(k0-lo+.5)*ch;ctx.moveTo(mg.l-3,yk);ctx.lineTo(mg.l-10,yk-5);ctx.lineTo(mg.l-10,yk+5);ctx.fill();
+  ctx.fillStyle=css('--echo');ctx.beginPath();const yk=mg.t+(k0-lo+.5)*ch;ctx.moveTo(mg.l-3,yk);ctx.lineTo(mg.l-10,yk-5);ctx.lineTo(mg.l-10,yk+5);ctx.fill();
   const bin=c/(2*fs),amb=k0true>=N;
-  ro('cubeRO',[['samples / PRI N',N],['pulse samples L',L],['bin size c/2fs',si(bin,'m')],['target bin k₀',`${k0}  (bin ${k0+1} counting from 1)`],['τ = DC·PRI',si(DC*PRI,'s')],['ΔR = cτ/2',si(c*DC*PRI/2,'m')],['R_ua',si(c*(PRI-DC*PRI)/2,'m')],['status',amb?'ambiguous: wrapped':'in range',amb?'bad':'ok']]);
+  ro('cubeRO',[['samples / PRI N',N],['pulse samples L',L],['bin size c/2fs',si(bin,'m')],['target bin k₀',`${k0}  (bin ${k0+1} counting from 1)`],['τ = DC·PRI',si(DC*PRI,'s')],['ΔR = cτ/2',si(c*DC*PRI/2,'m')],['R_ua',si(c*(PRI-DC*PRI)/2,'m')],['MF gain 10log₁₀L',num(10*Math.log10(L),3)+' dB'],['status',amb?'ambiguous: wrapped':'in range',amb?'bad':'ok']]);
 }
 bind(['dcFs','dcPri','dcDc','dcR','dcM','dcSnr'],[v=>si(v*1e3,'Hz'),v=>si(v*1e-3,'s'),v=>num(v,3),v=>si(v*1e3,'m'),v=>v,v=>v+' dB'],cube);
 $('dcMf').addEventListener('change',cube);
 
-/* ---------- 2b. DFT ---------- */
+/* ===== 2.5 DFT ===== */
 function dft(){
-  const fs=64,f0=+$('dfF0').value,N=+$('dfN').value,K=+$('dfK').value,Ne=Math.min(N,K);
-  const D=f=>{const d=(f0-f)/fs;const s=Math.sin(Math.PI*d);return Math.abs(s)<1e-9?Ne:Math.abs(Math.sin(Math.PI*Ne*d)/s);};
-  const fx=[],fy=[];for(let i=0;i<=1200;i++){const f=-fs/2+fs*i/1200;fx.push(f);fy.push(D(f));}
+  const fs=64,f0=+$('dfF0').value,f1=+$('dfF1').value,two=$('dfTwo').value==='1',N=+$('dfN').value,K=+$('dfK').value,Ne=Math.min(N,K);
+  const tones=two?[f0,f1]:[f0];
+  const D=f=>{let re=0,im=0;for(const ft of tones){const d=(ft-f)/fs;for(let n=0;n<Ne;n++){const a=2*Math.PI*d*n;re+=Math.cos(a);im+=Math.sin(a);}}return Math.hypot(re,im);};
+  const fx=[],fy=[];for(let i=0;i<=800;i++){const f=-fs/2+fs*i/800;fx.push(f);fy.push(D(f));}
   const kx=[],ky=[];for(let k=-K/2;k<K/2;k++){const f=k*fs/K;kx.push(f);ky.push(D(f));}
-  plot($('cvDft'),{x:[-fs/2,fs/2],y:[0,Ne*1.12],xlabel:'frequency (Hz), fs = 64 Hz',ylabel:'|X|',series:[{xs:fx,ys:fy,color:css('--muted'),width:1.3},{xs:kx,ys:ky,color:css('--echo'),stem:true,width:1.2}],vlines:[{x:f0,color:css('--tx'),label:'f₀'}]});
-  const onGrid=Math.abs(f0*K/fs-Math.round(f0*K/fs))<1e-9;
-  ro('dftRO',[['bin spacing fs/K',num(fs/K)+' Hz'],['true resolution ≈ fs/N',num(fs/Ne)+' Hz'],['observation time N/fs',num(Ne/fs)+' s'],['f₀ on bin grid?',onGrid?'yes: no leakage':'no: leakage',onGrid?'ok':'warn'],['peak height',num(Math.max(...ky),3)+` (max ${Ne})`]].concat(K<N?[['note','K < N: signal truncated','bad']]:[]));
+  const top=Math.max(...fy,Ne)*1.12;
+  const vl=[{x:f0,color:css('--tx'),label:'f₀'}];if(two)vl.push({x:f1,color:css('--tx'),label:'f₁',row:1});
+  plot($('cvDft'),{x:[-fs/2,fs/2],y:[0,top],xlabel:'frequency (Hz), fs = 64 Hz',ylabel:'|X|',series:[{xs:fx,ys:fy,color:css('--muted'),width:1.3},{xs:kx,ys:ky,color:css('--echo'),stem:true,width:1.2}],vlines:vl});
+  const onGrid=tones.every(t=>Math.abs(t*K/fs-Math.round(t*K/fs))<1e-9);
+  const items=[['bin spacing fs/K',num(fs/K)+' Hz'],['resolution ≈ fs/N',num(fs/Ne)+' Hz'],['observation time N/fs',num(Ne/fs)+' s'],['tones on bin grid?',onGrid?'yes: no leakage':'no: leakage',onGrid?'ok':'warn']];
+  if(two){const sep=Math.abs(f1-f0);items.push(['tone spacing',num(sep)+' Hz',sep>=fs/Ne?'ok':'bad'],['resolvable?',sep>=fs/Ne?'yes (spacing ≥ fs/N)':'no: merged',sep>=fs/Ne?'ok':'bad']);}
+  if(K<N)items.push(['note','K < N: signal truncated','bad']);
+  ro('dftRO',items);
 }
-bind(['dfF0','dfN'],[v=>v+' Hz',v=>v],dft);$('dfK').addEventListener('change',dft);
+bind(['dfF0','dfN','dfF1'],[v=>v+' Hz',v=>v,v=>v+' Hz'],dft);['dfK','dfTwo'].forEach(id=>$(id).addEventListener('change',dft));
 
-/* ---------- 3a. echo timing ---------- */
-function echo(){
-  const R=+$('etR').value*1e3,tau=+$('etTau').value*1e-6,PRI=+$('etPri').value*1e-3;
-  const t0=2*R/c,app=t0%PRI,Rua=c*(PRI-tau)/2;
-  const blind=app<tau||app+tau>PRI,amb=t0>=PRI;
-  const us=1e6,txR=[],ecR=[];for(let k=0;k<3;k++){txR.push([k*PRI*us,(k*PRI+tau)*us,1]);const s=k*PRI+t0;if(s<3*PRI)ecR.push([s*us,(s+tau)*us,.45]);}
-  plot($('cvEcho'),{x:[0,3*PRI*us],y:[0,1.15],xlabel:'time (µs)',ylabel:'amplitude',series:[{rects:txR,color:css('--tx')},{rects:ecR,color:css('--echo')}],vlines:[{x:t0*us,color:css('--echo'),label:'echo of pulse 1'}]});
-  let st,cl;if(blind){st='eclipsed: echo hits a Tx pulse';cl='bad';}else if(amb){st=`ambiguous: looks like ${si(c*app/2,'m')}`;cl='warn';}else{st='unambiguous';cl='ok';}
-  ro('echoRO',[['delay t₀ = 2R/c',si(t0,'s')],['R_ua = c(PRI−τ)/2',si(Rua,'m')],['min range / ΔR = cτ/2',si(c*tau/2,'m')],['PRF',si(1/PRI,'Hz')],['duty cycle',num(tau/PRI,3)],['status',st,cl]]);
-}
-bind(['etR','etTau','etPri'],[v=>v+' km',v=>v+' µs',v=>v+' ms'],echo);
-
-/* ---------- 3b. resolution ---------- */
+/* ===== 3.2 resolution ===== */
 function res(){
   const tau=+$('rsTau').value*1e-6,sep=+$('rsSep').value,W=c*tau/2,B=1/tau;
   const fx=[],fy=[];for(let i=0;i<=800;i++){const f=-5e6+1e7*i/800;const x=f*tau;fx.push(f/1e6);fy.push(Math.abs(x)<1e-9?1:Math.abs(Math.sin(Math.PI*x)/(Math.PI*x)));}
@@ -406,36 +1070,112 @@ function res(){
 }
 bind(['rsTau','rsSep'],[v=>v+' µs',v=>v+' m'],res);
 
-/* ---------- 4. barker ---------- */
+/* ===== 3.3 echo timing ===== */
+function echo(){
+  const R=+$('etR').value*1e3,tau=+$('etTau').value*1e-6,PRI=+$('etPri').value*1e-3;
+  const t0=2*R/c,app=t0%PRI,Rua=c*(PRI-tau)/2;
+  const blind=app<tau||app+tau>PRI,amb=t0>=PRI;
+  const us=1e6,txR=[],ecR=[];for(let k=0;k<3;k++){txR.push([k*PRI*us,(k*PRI+tau)*us,1]);const s=k*PRI+t0;if(s<3*PRI)ecR.push([s*us,(s+tau)*us,.45]);}
+  plot($('cvEcho'),{x:[0,3*PRI*us],y:[0,1.15],xlabel:'time (µs)',ylabel:'amplitude',series:[{rects:txR,color:css('--tx')},{rects:ecR,color:css('--echo')}],vlines:[{x:t0*us,color:css('--echo'),label:'echo of pulse 1'}]});
+  let st,cl;if(blind){st='eclipsed: echo hits a Tx pulse';cl='bad';}else if(amb){st=`ambiguous: looks like ${si(c*app/2,'m')}`;cl='warn';}else{st='unambiguous';cl='ok';}
+  ro('echoRO',[['delay t₀ = 2R/c',si(t0,'s')],['R_ua = c(PRI−τ)/2',si(Rua,'m')],['min range cτ/2',si(c*tau/2,'m')],['PRF',si(1/PRI,'Hz')],['duty cycle',num(tau/PRI,3)],['status',st,cl]]);
+}
+bind(['etR','etTau','etPri'],[v=>v+' km',v=>v+' µs',v=>v+' ms'],echo);
+
+/* ===== 3.4 quantization ===== */
+function quant(){
+  const R0=+$('qR').value,fs=+$('qFs').value*1e6,Ts=1/fs,t0=2*R0/c,bin=c/(2*fs),tau=5e-6;
+  const tmax=t0+tau+4e-6,us=1e6;
+  const cont=[[t0*us,(t0+tau)*us,1]];
+  const sx=[],sy=[];for(let n=0;n*Ts<=tmax;n++){const t=n*Ts;sx.push(t*us);sy.push(t>=t0&&t<t0+tau?1:0);}
+  const k0=Math.ceil(t0*fs-1e-9);const kr=Math.round(t0*fs);
+  plot($('cvQ'),{x:[0,tmax*us],y:[0,1.2],xlabel:'time (µs)  ·  each sample = one range bin',ylabel:'echo',series:[{rects:cont,color:css('--echo')},{xs:sx,ys:sy,color:css('--tx'),stem:true,width:1}],vlines:[{x:t0*us,color:css('--echo'),label:'true t₀'},{x:k0*Ts*us,color:css('--tx'),label:'first sample in echo',row:1}]});
+  ro('qRO2',[['bin size c/(2fs)',si(bin,'m')],['t₀·fs',num(t0*fs,4)],['k₀ = round(t₀·fs)',kr],['estimate R̂ = c·k₀/(2fs)',si(c*kr/(2*fs),'m')],['error R̂ − R₀',si(c*kr/(2*fs)-R0,'m')],['max |error| (rounding)',si(bin/2,'m')]]);
+}
+bind(['qR','qFs'],[v=>v+' m',v=>v+' MHz'],quant);
+
+/* ===== 3.6 MF stepper ===== */
+let mfSeed=99;
+function mfStep(){
+  const l=+$('mfShift').value,snr=+$('mfSnr').value,L=+$('mfL').value,N=40,k0=15;
+  seed=mfSeed;const sig=Math.sqrt(Math.pow(10,-snr/10));const y=[];for(let n=0;n<N;n++)y.push((n>=k0&&n<k0+L?1:0)+sig*gauss()*Math.SQRT1_2);
+  const z=[];for(let s=0;s<N;s++){let a=0;for(let i=0;i<L;i++)if(s+i<N)a+=y[s+i];z.push(a);}
+  const nx=[...Array(N).keys()];
+  const tplX=[],tplY=[];for(let i=0;i<L;i++){tplX.push(l+i-0.5,l+i+0.5);tplY.push(1,1);}
+  const ymax=Math.max(1.5,...y.map(Math.abs))*1.1;
+  plot($('cvMf1'),{x:[-0.5,N-0.5],y:[-ymax,ymax],xlabel:'sample n: received y[n] (orange) and the template x[n − l] (purple)',ylabel:'y',bands:[{from:l-0.5,to:l+L-0.5,color:css('--mf'),alpha:.12}],series:[{xs:nx,ys:y,color:css('--echo'),stem:true,width:1.2},{xs:[l-0.5,...tplX,l+L-0.5],ys:[0,...tplY,0],color:css('--mf'),width:2}]});
+  const zx=nx.slice(0,l+1),zy=z.slice(0,l+1);const zmax=Math.max(L,...z.map(Math.abs))*1.15;
+  plot($('cvMf2'),{x:[-0.5,N-0.5],y:[Math.min(0,...z)*1.15,zmax],xlabel:'output index l: z[l] = Σ y[l+i]·x[i]',ylabel:'z',series:[{xs:nx,ys:z,color:css('--grid'),stem:true,width:1,r:1.5},{xs:zx,ys:zy,color:css('--mf'),stem:true,width:1.4}],vlines:[{x:k0,color:css('--muted'),label:'k₀ = 15'}]});
+  const prods=[];for(let i=0;i<L;i++)if(l+i<N)prods.push(num(y[l+i],2));
+  const best=z.indexOf(Math.max(...z));
+  ro('mfRO',[['z[l] at this shift',num(z[l],3)],['= sum of',prods.length>4?prods.slice(0,3).join(' + ')+' + …':prods.join(' + ')],['peak at l =',best,best===k0?'ok':'bad'],['ideal peak (energy L)',L],['SNR in → out',`${snr} dB → ${num(snr+10*Math.log10(L),3)} dB`]]);
+}
+bind(['mfShift','mfSnr','mfL'],[v=>v,v=>v+' dB',v=>v],mfStep);
+let mfTimer=null;
+$('mfPlay').addEventListener('click',()=>{if(mfTimer){clearInterval(mfTimer);mfTimer=null;$('mfPlay').textContent='Play';return;}
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;$('mfPlay').textContent='Pause';const s=$('mfShift');if(+s.value>=39)s.value=0;
+  mfTimer=setInterval(()=>{let v=+s.value+1;if(v>39){clearInterval(mfTimer);mfTimer=null;$('mfPlay').textContent='Play';mfSeed=Math.floor(Math.random()*1e9);return;}s.value=v;$('mfShiftO').textContent=v;mfStep();},reduce?400:160);});
+
+/* ===== 4.3 autocorrelation ===== */
+function parseCode(s){return s.replace(/[^+\-−]/g,'').split('').map(ch=>ch==='+'?1:-1);}
+function acf(){
+  let code=parseCode($('acCode').value);if(code.length<1)code=[1];if(code.length>31)code=code.slice(0,31);
+  const N=code.length,lagEl=$('acLag');lagEl.min=-(N-1);lagEl.max=N-1;if(+lagEl.value>N-1)lagEl.value=N-1;if(+lagEl.value<-(N-1))lagEl.value=-(N-1);
+  const k=+lagEl.value;$('acLagO').textContent=k;
+  const r=[];for(let lag=-(N-1);lag<=N-1;lag++){let s=0;for(let i=0;i<N;i++){const j=i+lag;if(j>=0&&j<N)s+=code[i]*code[j];}r.push(s);}
+  const sym=v=>v>0?'+':'−';
+  const lo=Math.min(0,-k),hi=Math.max(N-1,N-1-k);let row1='',row2='',row3='',hdr='';
+  for(let p=lo;p<=hi;p++){hdr+=`<th>${p}</th>`;const a=p>=0&&p<N?code[p]:null,bi=p+k,b=bi>=0&&bi<N?code[bi]:null;
+    row1+=`<td>${a===null?'':sym(a)}</td>`;row2+=`<td>${b===null?'':sym(b)}</td>`;row3+=`<td class="hl">${a!==null&&b!==null?(a*b>0?'+1':'−1'):''}</td>`;}
+  $('acTable').innerHTML=`<table><thead><tr><th>i</th>${hdr}</tr></thead><tbody><tr><th>c[i]</th>${row1}</tr><tr><th>c[i+${k}]</th>${row2}</tr><tr><th>product</th>${row3}</tr></tbody></table><p>r[${k}] = sum of products = <b>${r[k+N-1]}</b></p>`;
+  const lags=[];for(let lag=-(N-1);lag<=N-1;lag++)lags.push(lag);
+  plot($('cvAc'),{x:[-(N-1)-0.5,N-1+0.5],y:[Math.min(-1.5,...r)-0.5,N+1],xlabel:'lag k (chips)',ylabel:'r[k]',series:[{xs:lags,ys:r,color:css('--mf'),stem:true,width:1.4}],vlines:[{x:k,color:css('--echo')}]});
+  // spectrum: chips with 8 samples each, zero-padded FFT via direct DTFT
+  const spc=8,x=[];code.forEach(v=>{for(let i=0;i<spc;i++)x.push(v);});
+  const S=(sig,fn)=>{let re=0,im=0;for(let n=0;n<sig.length;n++){const a=-2*Math.PI*fn*n/spc;re+=sig[n]*Math.cos(a);im+=sig[n]*Math.sin(a);}return Math.hypot(re,im);};
+  const plain=Array(x.length).fill(1);const fx=[],fc=[],fp=[];let mc=0,mp=0;const pts=400;
+  const sc=[],sp=[];for(let i=0;i<=pts;i++){const fn=-4+8*i/pts;fx.push(fn);const a=S(x,fn),b=S(plain,fn);sc.push(a);sp.push(b);mc=Math.max(mc,a);mp=Math.max(mp,b);}
+  for(let i=0;i<=pts;i++){fc.push(Math.max(-40,20*Math.log10(sc[i]/mp+1e-9)));fp.push(Math.max(-40,20*Math.log10(sp[i]/mp+1e-9)));}
+  plot($('cvAcSpec'),{x:[-4,4],y:[-40,3],xlabel:'normalized frequency f·τc',ylabel:'dB',series:[{xs:fx,ys:fp,color:css('--muted'),width:1},{xs:fx,ys:fc,color:css('--mf'),width:1.5}]});
+  let sl=0;r.forEach((v,i)=>{if(i!==N-1)sl=Math.max(sl,Math.abs(v));});
+  const isB=sl<=1&&N>1;
+  ro('acRO',[['length N',N],['peak r[0]',N],['max |sidelobe|',sl],['peak sidelobe level',sl?num(20*Math.log10(sl/N),3)+' dB':'−∞'],['Barker property (|r[k]| ≤ 1)?',isB?'yes':'no',isB?'ok':'bad']]);
+}
+$('acCode').addEventListener('input',acf);$('acLag').addEventListener('input',acf);
+$('acPreset').addEventListener('change',()=>{if($('acPreset').value){$('acCode').value=$('acPreset').value;$('acLag').value=1;acf();}});
+redraws.push(acf);
+
+/* ===== 4.4 compression lab ===== */
 const CODES={2:[1,-1],3:[1,1,-1],4:[1,1,-1,1],5:[1,1,1,-1,1],7:[1,1,1,-1,-1,1,-1],11:[1,1,1,-1,-1,-1,1,-1,-1,1,-1],13:[1,1,1,1,1,-1,-1,1,1,-1,1,-1,1]};
 let bkSeed=4242;
 function barker(){
-  const fs=4e6,spc=4,n=+$('bkN').value,plain=$('bkType').value==='plain',snr=+$('bkSnr').value,two=$('bkTwo').value==='2';
+  const fs=4e6,spc=4,n=+$('bkN').value,plain=$('bkType').value==='plain',snr=+$('bkSnr').value,two=$('bkTwo').value==='2',a2=Math.pow(10,+$('bkA2').value/20);
   const R1=+$('bkR1').value,R2=+$('bkR2').value;
   const code=plain?Array(n).fill(1):CODES[n];const x=[];code.forEach(v=>{for(let i=0;i<spc;i++)x.push(v);});const L=x.length;
   const Nw=Math.round(7000*2/c*fs)+L;const re=new Float64Array(Nw),im=new Float64Array(Nw);
   seed=bkSeed;const sig=Math.sqrt(Math.pow(10,-snr/10)/2);for(let i=0;i<Nw;i++){re[i]=sig*gauss();im[i]=sig*gauss();}
-  const ks=[Math.round(2*R1/c*fs)];if(two)ks.push(Math.round(2*R2/c*fs));for(const k of ks)for(let i=0;i<L;i++)if(k+i<Nw)re[k+i]+=x[i];
+  const tg=[[Math.round(2*R1/c*fs),1]];if(two)tg.push([Math.round(2*R2/c*fs),a2]);for(const[k,a]of tg)for(let i=0;i<L;i++)if(k+i<Nw)re[k+i]+=a*x[i];
   const z=new Float64Array(Nw);for(let l=0;l<Nw;l++){let a=0,b=0;for(let i=0;i<L&&l+i<Nw;i++){a+=re[l+i]*x[i];b+=im[l+i]*x[i];}z[l]=Math.hypot(a,b);}
   const rOf=l=>l*c/(2*fs)/1e3;const rx=[],ry=[],zy=[];for(let l=0;l<Nw-L;l++){rx.push(rOf(l));ry.push(re[l]);zy.push(z[l]);}
   const tx=[],ty=[];x.forEach((v,i)=>{tx.push(i/spc,(i+1)/spc);ty.push(v,v);});
   plot($('cvBkTx'),{x:[0,Math.max(13,n)],y:[-1.4,1.4],xlabel:'transmitted pulse: time (µs)',ylabel:'x(t)',series:[{xs:tx,ys:ty,color:css('--tx')}]});
   const ya=Math.max(2,...ry.map(Math.abs));
   plot($('cvBkRx'),{x:[0,rx[rx.length-1]],y:[-ya,ya],xlabel:'received Re{y}: range (km)',ylabel:'y',series:[{xs:rx,ys:ry,color:css('--echo'),width:1}]});
-  const zm=Math.max(...zy);const vl=[{x:R1/1e3,color:css('--muted'),label:'T1'}];if(two)vl.push({x:R2/1e3,color:css('--muted'),label:'T2'});
-  plot($('cvBkMf'),{x:[0,rx[rx.length-1]],y:[0,zm*1.1],xlabel:'matched-filter output |z|: range (km)',ylabel:'|z|',series:[{xs:rx,ys:zy,color:css('--mf'),width:1.8}],vlines:vl});
-  // noiseless autocorrelation for PSL
+  const zm=Math.max(...zy);const zdb=zy.map(v=>Math.max(-50,20*Math.log10(v/zm+1e-12)));
+  const vl=[{x:R1/1e3,color:css('--muted'),label:'T1'}];if(two)vl.push({x:R2/1e3,color:css('--muted'),label:'T2',row:1});
+  plot($('cvBkMf'),{x:[0,rx[rx.length-1]],y:[-50,3],xlabel:'matched-filter output 20·log₁₀|z| (normalized): range (km)',ylabel:'dB',series:[{xs:rx,ys:zdb,color:css('--mf'),width:1.5}],vlines:vl,hlines:plain?[]:[{y:20*Math.log10(1/n),color:css('--echo'),label:'Barker sidelobe level'}]});
   let pk=0,sl=0;for(let lag=-(L-1);lag<L;lag++){let s=0;for(let i=0;i<L;i++){const j=i+lag;if(j>=0&&j<L)s+=x[i]*x[j];}const a=Math.abs(s);if(lag===0)pk=a;else if(Math.abs(lag)>=spc)sl=Math.max(sl,a);}
   let best=0;for(let l=1;l<zy.length;l++)if(zy[l]>zy[best])best=l;
   const tau=n*1e-6,tc=plain?tau:1e-6;
   $('bkCode').textContent=plain?`Plain pulse, ${n} µs long`:`Barker-${n} chips: ${CODES[n].map(v=>v>0?'+':'−').join(' ')}`;
-  ro('bkRO',[['pulse length τ',si(tau,'s')],['chip τc',si(tc,'s')],['bandwidth ≈ 1/τc',si(1/tc,'Hz')],['ΔR = cτc/2',si(c*tc/2,'m')],['energy Σ|x|²',L+' (same either way)'],['peak sidelobe',sl?num(20*Math.log10(sl/pk),3)+' dB':'none (−∞)'],['MF gain 10log₁₀(L)',num(10*Math.log10(L),3)+' dB'],['strongest peak at',si(rx[best]*1e3,'m')],['T1 vs T2 spacing',two?si(Math.abs(R2-R1),'m'):'—',two?(Math.abs(R2-R1)>c*tc/2?'ok':'bad'):'']]);
+  const spacing=Math.abs(R2-R1);
+  ro('bkRO',[['pulse length τ',si(tau,'s')],['chip τc',si(tc,'s')],['bandwidth ≈ 1/τc',si(1/tc,'Hz')],['ΔR = cτc/2',si(c*tc/2,'m')],['energy Σ|x|²',L+' (same either way)'],['peak sidelobe',sl?num(20*Math.log10(sl/pk),3)+' dB':'none (−∞)'],['MF gain 10log₁₀(L)',num(10*Math.log10(L),3)+' dB'],['strongest peak at',si(rx[best]*1e3,'m')],['T1–T2 spacing vs ΔR',two?si(spacing,'m')+(spacing>c*tc/2?' > ΔR':' ≤ ΔR'):'—',two?(spacing>c*tc/2?'ok':'bad'):'']]);
 }
-bind(['bkSnr','bkR1','bkR2'],[v=>v+' dB',v=>si(v,'m'),v=>si(v,'m')],barker);
+bind(['bkSnr','bkR1','bkR2','bkA2'],[v=>v+' dB',v=>si(v,'m'),v=>si(v,'m'),v=>v+' dB'],barker);
 ['bkType','bkN','bkTwo'].forEach(id=>$(id).addEventListener('change',barker));
 $('bkNoise').addEventListener('click',()=>{bkSeed=Math.floor(Math.random()*1e9);barker();});
 
-/* ---------- calculator ---------- */
+/* ===== calculator ===== */
 function calc(){
   const g=id=>{const v=parseFloat($(id).value);return isFinite(v)?v:NaN;};
   const fs=g('cFs'),PRI=g('cPri'),DC=g('cDc'),R0=g('cR'),N=Math.max(1,Math.round(g('cN')||1));let tau=g('cTau');const fromDC=!isFinite(tau);if(fromDC)tau=DC*PRI;
@@ -446,34 +1186,42 @@ function calc(){
     ['Chip width τc','τc = τ / N',`${e(tau)} / ${N}`,si(tc,'s')],
     ['Bandwidth B','B ≈ 1/τc',`1 / ${e(tc)}`,si(B,'Hz')],
     ['Range resolution ΔR','ΔR = c/(2B) = cτc/2',`3e8 × ${e(tc)} / 2`,si(dR,'m')],
+    ['Compression ratio','τ / τc = N',`${e(tau)} / ${e(tc)}`,N],
     ['PRF','PRF = 1/PRI',`1 / ${e(PRI)}`,si(1/PRI,'Hz')],
     ['Max unambiguous range','R_ua = c(PRI − τ)/2',`3e8 × (${e(PRI)} − ${e(tau)}) / 2`,si(Rua,'m')+`  (≈ cPRI/2 = ${si(c*PRI/2,'m')})`],
+    ['Minimum range','R_min = cτ/2',`3e8 × ${e(tau)} / 2`,si(c*tau/2,'m')],
     ['Bin size','ΔR_bin = c/(2fs)',`3e8 / (2 × ${e(fs)})`,si(bin,'m')],
     ['Samples per PRI','N = PRI·fs',`${e(PRI)} × ${e(fs)}`,e(Ns)],
     ['Samples per pulse','L = τ·fs',`${e(tau)} × ${e(fs)}`,e(L)],
+    ['MF processing gain','10·log₁₀(L)',`10·log₁₀(${e(L)})`,num(10*Math.log10(L),3)+' dB'],
     ['Samples per resolution cell','fs / B',`${e(fs)} / ${e(B)}`,e(fs/B)],
     ['Echo delay','t₀ = 2R₀/c',`2 × ${e(R0)} / 3e8`,si(t0,'s')],
     ['Target bin','k₀ = round(t₀·fs)',`round(${e(t0*fs)})`,`${k0}  (counting from 1: bin ${k0+1})`],
     ['Estimated range','R̂ = c·k₀/(2fs)',`3e8 × ${k0} / (2 × ${e(fs)})`,si(c*k0/(2*fs),'m')+`  (error ${si(c*k0/(2*fs)-R0,'m')})`],
-    ['Status','t₀ vs PRI',`${e(t0)} vs ${e(PRI)}`,t0<PRI-tau?'<span class="ok">unambiguous</span>':'<span class="bad">beyond R_ua: ambiguous or eclipsed</span>']
+    ['Status','t₀ vs PRI − τ',`${e(t0)} vs ${e(PRI-tau)}`,t0<PRI-tau&&t0>=tau?'<span class="ok">unambiguous</span>':t0<tau?'<span class="bad">inside minimum range</span>':'<span class="bad">beyond R_ua: ambiguous or eclipsed</span>']
   ];
   $('calcBody').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td class="mono">${r[1]}</td><td class="mono">${r[2]}</td><td class="mono"><b>${r[3]}</b></td></tr>`).join('');
 }
 ['cFs','cPri','cDc','cTau','cR','cN'].forEach(id=>$(id).addEventListener('input',calc));calc();
 
-/* ---------- quiz ---------- */
+/* ===== quiz ===== */
 let right=0,tried=0;const score=()=>{$('scoreTop').textContent=`score ${right} / ${tried}`;};
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const GENS=[
  ()=>{const t=pick([0.5,1,2,5,10,20]);const a=c*t*1e-6/2;return{tag:'range resolution',q:`A plain rectangular pulse has width τ = ${t} µs. What is its range resolution ΔR?`,a,u:'m',s:`ΔR = cτ/2 = 3·10⁸ × ${t}·10⁻⁶ / 2 = ${num(a)} m`};},
  ()=>{const B=pick([0.5,1,2,5,10,50]);const a=c/(2*B*1e6);return{tag:'bandwidth',q:`A waveform has bandwidth B = ${B} MHz. What range resolution does it give?`,a,u:'m',s:`ΔR = c/(2B) = 3·10⁸ / (2 × ${B}·10⁶) = ${num(a)} m`};},
  ()=>{const p=pick([0.5,1,2,4,5,10]);const a=c/(2*p*1e3)/1e3;return{tag:'ambiguity',q:`A radar has PRF = ${p} kHz. Ignoring τ, what is the maximum unambiguous range?`,a,u:'km',s:`PRI = 1/PRF = ${num(1/p)} ms\nR_ua ≈ c·PRI/2 = 3·10⁸ × ${num(1/(p*1e3))} / 2 = ${num(a)} km`};},
+ ()=>{const T=pick([0.5,1,2]),R=pick([1.2,1.5,2])*T*150;const ap=(2*R*1e3/c)%(T*1e-3);const a=c*ap/2/1e3;return{tag:'ambiguity',q:`PRI = ${T} ms (ignore τ). A target is really at ${num(R)} km. At what range does the radar report it?`,a,u:'km',s:`t₀ = 2R/c = ${num(2*R*1e3/c*1e3)} ms\napparent delay = t₀ mod PRI = ${num(ap*1e3)} ms\nR_app = c·(t₀ mod PRI)/2 = ${num(a)} km`};},
  ()=>{const f=pick([0.2,1,2,5,10,20]);const a=c/(2*f*1e6);return{tag:'sampling',q:`The ADC samples at f_s = ${f} MHz. How many metres does one range bin cover?`,a,u:'m',s:`ΔR_bin = c/(2f_s) = 3·10⁸ / (2 × ${f}·10⁶) = ${num(a)} m`};},
  ()=>{const R=pick([1.5,3,4.5,6,7.5,12]),f=pick([1,2,4]);const a=Math.round(2*R*1e3/c*f*1e6);return{tag:'signal model',q:`A target is at R₀ = ${R} km and f_s = ${f} MHz. By how many samples k₀ is the echo delayed?`,a,u:'samples',s:`t₀ = 2R₀/c = 2 × ${R*1e3} / 3·10⁸ = ${num(2*R*1e3/c*1e6)} µs\nk₀ = round(t₀·f_s) = round(${num(2*R*1e3/c*f*1e6)}) = ${a}`};},
+ ()=>{const L=pick([10,20,52,100,200]);const a=10*Math.log10(L);return{tag:'matched filter',q:`A constant-amplitude pulse spans L = ${L} samples. By how many dB does the matched filter improve the SNR?`,a,u:'dB',s:`SNR_out / SNR_in = L\ngain = 10·log₁₀(${L}) = ${num(a)} dB`};},
  ()=>{const n=pick([5,7,11,13]),tc=pick([0.5,1,2]);const a=c*tc*1e-6/2;return{tag:'pulse compression',q:`A Barker-${n} pulse has total length ${n*tc} µs. What is its compressed range resolution ΔR_c?`,a,u:'m',s:`τ_c = τ/N = ${n*tc}/${n} = ${tc} µs\nΔR_c = cτ_c/2 = 3·10⁸ × ${tc}·10⁻⁶ / 2 = ${num(a)} m\n(a plain pulse of the same length gives ${num(c*n*tc*1e-6/2)} m)`};},
  ()=>{const t=pick([10,20,50,100,200,400]);const a=c*t*1e-6/2/1e3;return{tag:'ranging',q:`An echo arrives t₀ = ${t} µs after transmission. What is the target range?`,a,u:'km',s:`R₀ = c·t₀/2 = 3·10⁸ × ${t}·10⁻⁶ / 2 = ${num(a)} km`};},
  ()=>{const d=pick([0.05,0.1,0.2]),p=pick([0.5,1,2]);const a=d*p*1e3;return{tag:'terminology',q:`Duty cycle DC = ${d} and PRI = ${p} ms. What is the pulse width τ?`,a,u:'µs',s:`τ = DC·PRI = ${d} × ${p} ms = ${num(a)} µs`};},
- ()=>{const n=pick([5,7,11,13]);const a=20*Math.log10(1/n);return{tag:'Barker',q:`What is the peak sidelobe level of a Barker-${n} code's matched-filter output, in dB?`,a,u:'dB',s:`peak = N = ${n}, largest sidelobe = 1\nPSL = 20·log₁₀(1/${n}) = ${num(a)} dB`};}
+ ()=>{const n=pick([5,7,11,13]);const a=20*Math.log10(1/n);return{tag:'Barker',q:`What is the peak sidelobe level of a Barker-${n} code's matched-filter output, in dB?`,a,u:'dB',s:`peak = N = ${n}, largest sidelobe = 1\nPSL = 20·log₁₀(1/${n}) = ${num(a)} dB`};},
+ ()=>{const k=pick([2,3,4]);const a=40*Math.log10(k);return{tag:'radar equation',q:`A target moves from range R to ${k}R. By how many dB does the received power drop?`,a,u:'dB',s:`P_r ∝ 1/R⁴, so the ratio is ${k}⁴ = ${Math.pow(k,4)}\n10·log₁₀(${Math.pow(k,4)}) = 40·log₁₀(${k}) = ${num(a)} dB`};},
+ ()=>{const f=pick([1,3,10,24,77]);const a=c/(f*1e9)*100;return{tag:'wavelength',q:`What is the wavelength of a ${f} GHz radar, in cm?`,a,u:'cm',s:`λ = c/f = 3·10⁸ / ${f}·10⁹ = ${num(a/100)} m = ${num(a)} cm`};},
+ ()=>{const fs=pick([16,32,64,128]),N=pick([16,32,64,128]);const a=fs/N;return{tag:'DFT',q:`A tone is observed for N = ${N} samples at f_s = ${fs} Hz, then zero-padded to 1024 points. What is the frequency resolution?`,a,u:'Hz',s:`Resolution ≈ f_s/N = ${fs}/${N} = ${num(a)} Hz\nZero-padding to 1024 does not change it.`};}
 ];
 let cur;
 function nextQ(){cur=pick(GENS)();$('nqTag').textContent=cur.tag;$('nqText').textContent=cur.q;$('nqUnit').textContent=cur.u;$('nqIn').value='';$('nqFb').innerHTML='';$('nqSol').hidden=true;$('nqSol').textContent=cur.s;cur.done=false;}
@@ -486,21 +1234,34 @@ $('nqIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('nqCheck').click()
 nextQ();
 
 const MCQ=[
+ ['A monostatic radar is one that…',['uses one antenna for both transmitting and receiving','transmits a single pulse','uses a single frequency','has one receiver channel'],0,'Monostatic = Tx and Rx at the same place, sharing an antenna through a duplexer. Bistatic separates them.'],
+ ['If the range to a target doubles, the received power…',['halves','drops to a quarter','drops to 1/16 (−12 dB)','stays the same'],2,'P_r ∝ 1/R⁴: the wave spreads out on the way to the target (1/R²) and again on the way back (1/R²).'],
+ ['A 3 dB beamwidth is the angle between the points where the power is…',['zero','half the peak','one tenth of the peak','at the first sidelobe'],1,'−3 dB ≈ 0.5 in linear power. A larger antenna (D/λ) gives a narrower beam.'],
  ['If you double the sampling rate f_s, the range resolution ΔR…',['halves','stays the same','doubles','depends on the PRF'],1,'ΔR = c/(2B) depends only on the pulse bandwidth. Raising f_s gives smaller bins (more samples per resolution cell), not better resolution.'],
- ['Why does the receiver keep the signal complex (I and Q)?',['To double the SNR','To keep the phase, which carries Doppler information','Because the ADC requires it','To remove clutter'],1,'One complex sample stores both amplitude and phase. Doppler shows up as a phase rotation from pulse to pulse.'],
- ['Zero-padding a signal before the FFT (bigger K, same N)…',['improves frequency resolution','samples the same DTFT more densely','removes spectral leakage in all cases','reduces noise'],1,'The DTFT shape is set by N. Larger K only draws it with more points. It can hide leakage if a bin happens to land on f₀, but resolution stays ≈ fs/N.'],
+ ['Why does the receiver keep the signal complex (I and Q)?',['To double the SNR','To keep the phase, which carries Doppler information','Because the ADC requires it','To remove clutter'],1,'One complex sample stores both amplitude and phase. With I only, +f_D and −f_D look identical.'],
+ ['The DTFT of a sampled signal repeats every f_s because…',['the signal is periodic','e^{−j2πn} = 1 for every integer n','of the windowing','the FFT is circular'],1,'Replacing f by f + f_s multiplies each term by e^{−j2πn}, which equals 1 for integer n. Sampled signals cannot tell f and f + f_s apart.'],
+ ['Zero-padding a signal before the FFT (bigger K, same N)…',['improves frequency resolution','samples the same DTFT more densely','removes spectral leakage in all cases','reduces noise'],1,'The DTFT shape is set by N. Larger K only draws it with more points. Resolution stays ≈ fs/N.'],
+ ['In the data cube y[l, m], the fast-time index l corresponds to…',['the pulse number','range','Doppler frequency','antenna element'],1,'l counts samples inside one PRI, so each l is a range bin of width c/(2fs). m counts pulses (slow time).'],
  ['The matched filter impulse response is…',['h[n] = x[n]','h[n] = x*[−n]','h[n] = 1/x[n]','an ideal low-pass filter'],1,'h[n] = x*[−n]: the transmitted pulse, time-reversed and conjugated. Filtering with it is the same as correlating y with x.'],
- ['The peak output SNR of a matched filter in white noise depends on…',['the pulse shape','the pulse energy only','the PRF','the number of range bins'],1,'Peak SNR = E/N₀. That is why a long, coded pulse detects as well as a long plain pulse while resolving like a short one.'],
+ ['The peak output SNR of a matched filter in white noise depends on…',['the pulse shape','the pulse energy only','the PRF','the number of range bins'],1,'Peak SNR = E/σ² (Cauchy–Schwarz). That is why a long coded pulse detects as well as a long plain pulse while resolving like a short one.'],
+ ['The matched-filter output of a rectangular pulse is…',['a rectangle','a sinc','a triangle of base 2τ','a Gaussian'],2,'The autocorrelation of a rectangle grows linearly with overlap, peaks at full overlap and falls again: a triangle.'],
+ ['np.convolve(y, h) puts the peak for a target at sample k₀ at index…',['k₀','k₀ − L + 1','k₀ + L − 1','L'],2,'Full convolution adds the filter length minus one. Subtract L − 1 before converting to range.'],
  ['Why can\'t we get more pulse energy just by increasing the amplitude A?',['It would reduce bandwidth','The transmitter has a peak-power limit','It would cause aliasing','It changes the carrier'],1,'Peak power is capped by the amplifier hardware. The only way to add energy is a longer pulse, which pulse compression makes usable.'],
  ['An echo arrives after the next pulse has already been transmitted. The radar…',['measures it correctly','reports the target closer than it is','reports it farther away','sees it at zero Doppler'],1,'The receiver times the echo from the most recent pulse, so the apparent delay is t₀ mod PRI. This is range ambiguity.'],
- ['In the data cube y[l, m], the fast-time index l corresponds to…',['the pulse number','range','Doppler frequency','antenna element'],1,'l counts samples inside one PRI, so each l is a range bin of width c/(2fs). m counts pulses (slow time).'],
  ['Barker-13 compared with a plain pulse of the same length:',['same bandwidth, more energy','about 13× the bandwidth, same energy','13× less energy','same resolution'],1,'Chips are 13× shorter, so the bandwidth grows ~13× and ΔR improves 13×. Energy is still A²τ.'],
- ['Spectral leakage appears when…',['the tone falls between DFT bins','N is a power of two','the signal is complex','fs is too high'],0,'If f₀ is not an integer multiple of fs/K, no bin sits on the peak and the sinc sidelobes are sampled at non-zero points.']
+ ['What makes a Barker code special?',['It has the widest bandwidth','All autocorrelation sidelobes have magnitude ≤ 1','It has the most energy','It is immune to Doppler'],1,'Any ±1 code widens the bandwidth equally. Barker codes are the ones whose sidelobes are as small as possible.'],
+ ['A weak target 3 chips away from a strong one may be missed with Barker-13 because…',['of range ambiguity','it falls below the strong target\'s −22.3 dB sidelobes','the bins are too wide','of spectral leakage'],1,'Sidelobes of a strong echo can be larger than the main peak of a weak one. This is sidelobe masking.'],
+ ['Spectral leakage appears when…',['the tone falls between DFT bins','N is a power of two','the signal is complex','fs is too high'],0,'If f₀ is not an integer multiple of fs/K, no bin sits on the peak and the asinc sidelobes are sampled at non-zero points.']
 ];
 $('mcqs').innerHTML=MCQ.map((q,i)=>`<div class="mcq" data-i="${i}"><b>${i+1}. ${q[0]}</b><div class="opts">${q[1].map((o,j)=>`<button data-j="${j}">${o}</button>`).join('')}</div><div class="why" hidden></div></div>`).join('');
 document.querySelectorAll('.mcq').forEach(box=>{const q=MCQ[+box.dataset.i];box.querySelectorAll('.opts button').forEach(b=>b.addEventListener('click',()=>{if(box.dataset.done)return;box.dataset.done=1;const j=+b.dataset.j;tried++;if(j===q[2])right++;score();box.querySelectorAll('.opts button').forEach(x=>{if(+x.dataset.j===q[2])x.classList.add('right');else if(x===b)x.classList.add('wrong');});const w=box.querySelector('.why');w.hidden=false;w.textContent=(j===q[2]?'Correct. ':'Not quite. ')+q[3];}));});
 
-/* ---------- redraw on theme/resize ---------- */
+/* ===== chapter progress ===== */
+function syncDone(){document.querySelectorAll('.done').forEach(cb=>{const a=document.querySelector(`nav.toc a[data-sec="${cb.dataset.sec}"]`);if(a)a.classList.toggle('done',cb.checked);});}
+document.querySelectorAll('.done').forEach(cb=>{cb.checked=store.get('radar-done-'+cb.dataset.sec)==='1';cb.addEventListener('change',()=>{store.set('radar-done-'+cb.dataset.sec,cb.checked?'1':'0');syncDone();});});
+syncDone();
+
+/* ===== redraw on theme/resize ===== */
 const all=()=>redraws.forEach(f=>{try{f();}catch(e){console.error(e);}});
 all();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(all,80);}).observe(document.body);
@@ -508,5 +1269,5 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',all);
 new MutationObserver(all).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 })();
 </script>
-
-</body></html>
+</body>
+</html>
